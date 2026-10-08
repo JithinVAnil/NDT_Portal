@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* Institutional palette: navy / blue / white / light grey with restrained accents */
+@theme {
+  --font-sans: "Segoe UI", "Inter", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Cascadia Mono", "Consolas", ui-monospace, monospace;
+
+  --color-navy-950: #061428;
+  --color-navy-900: #0b2545;
+  --color-navy-800: #13315c;
+  --color-navy-700: #1d4073;
+  --color-navy-600: #275090;
+  --color-brand-600: #1f5fbf;
+  --color-brand-500: #2f74d0;
+  --color-brand-100: #e3edfb;
+  --color-brand-50: #f1f6fd;
+
+  --color-ink: #16202e;
+  --color-muted: #5a6475;
+  --color-subtle: #8a93a3;
+  --color-line: #dde3ec;
+  --color-canvas: #f4f6f9;
+  --color-surface: #ffffff;
+
+  --color-ok: #1e7b4f;
+  --color-ok-bg: #e7f5ee;
+  --color-warn: #a35f00;
+  --color-warn-bg: #fff4dc;
+  --color-bad: #b42318;
+  --color-bad-bg: #fdecea;
+  --color-info: #1f5fbf;
+  --color-info-bg: #e8f0fc;
+  --color-saffron: #e8891c;
+
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 6px;
+}
+
+:root {
+  color-scheme: light;
+}
+
+/* Single-column grids shrink to the viewport on small screens (wide tables scroll inside their card). */
+@layer base {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .grid > * { min-width: 0; }
+}
+
+html,
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Thin, unobtrusive scrollbars for dense data views */
+.scroll-thin::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: #c8d0dc;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #eceff4 0px, #f6f8fb 160px, #eceff4 320px);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+}
+
+@media print {
+  aside, header nav, .no-print { display: none !important; }
+}
