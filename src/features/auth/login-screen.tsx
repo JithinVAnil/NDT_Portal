@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  AlertTriangle,
   Building2,
   Cloud,
   Eye,
@@ -21,7 +20,6 @@ import {
 } from "lucide-react";
 import { useAuth, ROLE_HOME } from "@/lib/auth";
 import { Alert } from "@/components/ui/states";
-import { DemoBanner } from "@/components/layout/portal-shell";
 import { cn } from "@/lib/utils";
 
 const schema = z.object({
@@ -93,8 +91,6 @@ export function LoginScreen() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f8fafc]">
-      <DemoBanner />
-
       <div className="grid flex-1 lg:grid-cols-[1.38fr_1fr]">
         {/* Left Hero Section */}
         <section className="relative hidden flex-col justify-between overflow-hidden bg-[#011431] px-10 py-10 text-white lg:flex xl:px-14">
@@ -118,24 +114,23 @@ export function LoginScreen() {
             aria-hidden
           />
 
-          {/* Top Branding */}
+          {/* Top Branding - Powered by i-Connectresources */}
           <div className="relative z-10">
-            <div className="flex items-start gap-3.5">
-              <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg border border-white/20 bg-[#0d223f] text-[11px] font-bold leading-none tracking-widest text-white shadow-inner">
-                <span>NIE</span>
-                <span className="mt-0.5">LIT</span>
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 border border-white/20 p-2 backdrop-blur-sm shadow-md">
+                <img
+                  src="/iconnect-icon-white.png"
+                  alt="i-Connectresources Logo"
+                  className="h-8 w-auto object-contain"
+                />
               </div>
               <div>
-                <h2 className="text-[16px] font-bold tracking-wider text-white leading-tight">NIELIT</h2>
-                <p className="text-[11px] text-slate-300 leading-snug mt-0.5">
-                  National Institute of Electronics &amp; Information Technology
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-400">
+                  POWERED BY
                 </p>
-                <p className="text-[10px] text-slate-400 leading-snug">
-                  Ministry of Electronics &amp; Information Technology
-                </p>
-                <p className="text-[10px] text-slate-400 leading-snug">
-                  Government of India
-                </p>
+                <h2 className="text-[14.5px] font-bold tracking-wide text-white leading-snug">
+                  I-CONNECTRESOURCES INTERNATIONAL PRIVATE LIMITED
+                </h2>
               </div>
             </div>
           </div>
@@ -220,7 +215,7 @@ export function LoginScreen() {
           </div>
 
           <div className="relative z-10 text-[11px] text-slate-400/80">
-            © NIELIT Digital Training &amp; Forensics Capacity Building Programme
+            © I-CONNECTRESOURCES INTERNATIONAL PRIVATE LIMITED · Digital Training &amp; Forensics Capacity Building Platform
           </div>
         </section>
 
@@ -229,13 +224,16 @@ export function LoginScreen() {
           <div className="w-full max-w-[430px] rounded-2xl bg-white p-7 sm:p-9 shadow-[0_4px_30px_rgba(0,0,0,0.06)] border border-slate-100">
             {/* Mobile Branding */}
             <div className="mb-6 flex items-center gap-3 lg:hidden">
-              <div className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-lg border border-slate-900 bg-slate-900 text-[10px] font-bold leading-none tracking-widest text-white">
-                <span>NIE</span>
-                <span>LIT</span>
-              </div>
+              <img
+                src="/iconnect-icon-blue.png"
+                alt="i-Connectresources Logo"
+                className="h-9 w-auto object-contain"
+              />
               <div>
-                <p className="text-[15px] font-bold tracking-wider text-slate-900">NIELIT</p>
-                <p className="text-[11px] text-slate-500">Ministry of Electronics &amp; IT · Govt of India</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-blue-600">POWERED BY</p>
+                <p className="text-[13px] font-bold text-slate-900 leading-tight">
+                  I-CONNECTRESOURCES INTERNATIONAL PVT. LTD.
+                </p>
               </div>
             </div>
 
@@ -310,7 +308,7 @@ export function LoginScreen() {
               <div className="flex justify-end pt-0.5">
                 <button
                   type="button"
-                  onClick={() => alert("For password resets, please contact your NIELIT portal administrator.")}
+                  onClick={() => alert("For password resets, please contact your portal administrator.")}
                   className="text-[12px] font-medium text-blue-600 hover:text-blue-700 hover:underline"
                 >
                   Forgot password?
