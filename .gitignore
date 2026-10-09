@@ -1,5 +1,36 @@
-node_modules
-.next
-out
+# Node.js dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Python cache and environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Build files
+dist/
+build/
 *.tsbuildinfo
-.env*.local
+
+# Logs
+*.log
+
+# Databases - review before committing
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE and operating system files
+.vscode/
+.DS_Store
+Thumbs.db
