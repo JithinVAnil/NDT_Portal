@@ -12,14 +12,7 @@ import { GlobalSearch } from "./global-search";
 import { Skeleton } from "@/components/ui/states";
 
 export function DemoBanner() {
-  return (
-    <div className="no-print flex items-center justify-center gap-2 bg-[#fdf6d8] px-4 py-1.5 text-center text-[12px] text-[#854d0e] border-b border-[#fae89f]">
-      <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-[#b45309]" />
-      <span className="font-bold tracking-wide">DEMONSTRATION ENVIRONMENT — SAMPLE DATA</span>
-      <span className="text-[#b45309]/60">·</span>
-      <span className="font-normal">Prototype for evaluation only · Not an official NIELIT production system</span>
-    </div>
-  );
+  return null;
 }
 
 export function BrandBlock({ compact = false, dark = true }: { compact?: boolean; dark?: boolean }) {
