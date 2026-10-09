@@ -239,7 +239,7 @@ export function LoginScreen() {
               </div>
             </div>
 
-            <h2 className="text-[26px] font-bold tracking-tight text-slate-900">Sign in</h2>
+            <h2 className="text-[20px] font-bold tracking-tight text-slate-900">Sign in</h2>
             <p className="mt-1 text-[13px] text-slate-500">Use your portal account to continue.</p>
 
             {params.get("expired") && (
