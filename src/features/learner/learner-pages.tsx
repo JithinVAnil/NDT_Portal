@@ -27,7 +27,7 @@ import type { ContentItem, CourseTree, EnrollmentBundle, LearnerProfile } from "
 import { CompletionCriteria, ProgressBreakdown, RiskReasons } from "../learners/progress-panels";
 import { SimpleTable } from "../learners/learner-detail";
 import { CourseTreeView, HierarchyStrip } from "../courses/course-tree";
-import { VideoPlayer } from "../content/video-player";
+import { NduVideoPlayer } from "../content/ndu-video-player";
 
 function useMe() {
   return useApi<LearnerProfile>("/learner/me");
@@ -292,7 +292,7 @@ export function MyContentPage() {
           <Card>
             {current ? (
               <CardBody className="space-y-3">
-                <VideoPlayer item={current} />
+                <NduVideoPlayer item={current} />
                 <div>
                   <h2 className="text-[16px] font-semibold text-navy-900">{current.title}</h2>
                   <p className="text-[12.5px] text-muted">{current.module ? `M${current.module_sequence}: ${current.module}` : ""}{current.lesson ? ` › ${current.lesson}` : ""} · {current.duration_minutes} min · {current.instructor}</p>

@@ -39,6 +39,10 @@ class NduAdapter(ABC):
     def fetch_learning_update(self, learner_ref: str, course_ref: str, modules_completed: int, modules_total: int,
                               content_completed: int, content_total: int) -> NduResult: ...
 
+    @abstractmethod
+    def request_playback(self, learner_ref: str, course_ref: str, content_code: str) -> NduResult:
+        """Fetch a time-limited playback URL for a video from NDU. The portal never hosts video itself."""
+
 
 class MockNduAdapter(NduAdapter):
     """Deterministic local simulation of NDU behaviour."""
@@ -77,6 +81,20 @@ class MockNduAdapter(NduAdapter):
             True,
             "Demo NDU reported new module completion",
             {"modules_completed": new_modules, "content_completed": new_content},
+        )
+
+    def request_playback(self, learner_ref: str, course_ref: str, content_code: str) -> NduResult:
+        """Simulate NDU returning a signed, time-limited playback URL. No real stream is served."""
+        token = hashlib.sha1(f"{learner_ref}:{content_code}".encode()).hexdigest()[:16]
+        return NduResult(
+            True,
+            f"Demo NDU issued a playback token for {content_code}",
+            {
+                "playback_url": f"https://ndu.digital/demo-play/{content_code}?token={token}",
+                "expires_in_seconds": 900,
+                "requires_ndu_login": True,
+                "note": "Prototype hook — the real NDU returns a signed HLS/DASH URL once official API access is provided.",
+            },
         )
 
 

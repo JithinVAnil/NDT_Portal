@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useAuth, ROLE_HOME } from "@/lib/auth";
 import { Alert } from "@/components/ui/states";
+import { Dialog } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 const schema = z.object({
@@ -55,6 +56,7 @@ export function LoginScreen() {
   const params = useSearchParams();
   const [error, setError] = React.useState<string | null>(null);
   const [showPassword, setShowPassword] = React.useState(false);
+  const [forgotOpen, setForgotOpen] = React.useState(false);
 
   const {
     register,
@@ -308,7 +310,7 @@ export function LoginScreen() {
               <div className="flex justify-end pt-0.5">
                 <button
                   type="button"
-                  onClick={() => alert("For password resets, please contact your portal administrator.")}
+                  onClick={() => setForgotOpen(true)}
                   className="text-[12px] font-medium text-blue-600 hover:text-blue-700 hover:underline"
                 >
                   Forgot password?
@@ -382,6 +384,27 @@ export function LoginScreen() {
           </div>
         </section>
       </div>
+      <Dialog
+        open={forgotOpen}
+        onOpenChange={setForgotOpen}
+        size="sm"
+        title="Reset your password"
+        description="Password resets are handled by the programme administrator."
+        footer={
+          <button
+            type="button"
+            onClick={() => setForgotOpen(false)}
+            className="h-9 rounded-lg bg-[#07172f] px-4 text-[13px] font-semibold text-white hover:bg-[#0c2448] transition-colors"
+          >
+            Close
+          </button>
+        }
+      >
+        <p className="text-[13px] text-slate-600">
+          For password resets, please contact your portal administrator. They can issue a new
+          temporary password from <span className="font-medium text-slate-800">Administrator → Users</span>.
+        </p>
+      </Dialog>
     </div>
   );
 }

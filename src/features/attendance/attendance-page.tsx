@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import { CheckCheck, Save } from "lucide-react";
+import { CheckCheck, FileUp, QrCode, Save, KeyRound } from "lucide-react";
 import { api } from "@/lib/api";
 import { useApi } from "@/hooks/use-api";
 import { useAuth } from "@/lib/auth";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
 import { Alert, EmptyState, ErrorState, LoadingBlock, ProgressBar } from "@/components/ui/states";
 import { DataTable } from "@/components/data-table";
+import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
 import { cn, pct } from "@/lib/utils";
 import type { Batch, Role } from "@/types/api";
@@ -49,6 +50,10 @@ export function AttendancePage({ role }: { role: Role }) {
   const [marks, setMarks] = React.useState<Record<number, Status | null>>({});
   const [saving, setSaving] = React.useState(false);
   const [lastSave, setLastSave] = React.useState<{ rate: number | null; counts: Record<string, number> } | null>(null);
+  const [bulkOpen, setBulkOpen] = React.useState(false);
+  const [bulkText, setBulkText] = React.useState("");
+  const [bulkErr, setBulkErr] = React.useState<string | null>(null);
+  const [placeholder, setPlaceholder] = React.useState<"qr" | "otp" | null>(null);
 
   React.useEffect(() => {
     if (!batchId && usable.length) {
@@ -97,6 +102,33 @@ export function AttendancePage({ role }: { role: Role }) {
     }
   };
 
+  const applyBulk = () => {
+    if (!sheet.data) return;
+    setBulkErr(null);
+    const byCode = new Map(sheet.data.rows.map((r) => [r.learner_code.toLowerCase(), r.learner_id]));
+    const next: Record<number, Status | null> = { ...marks };
+    let applied = 0;
+    const bad: string[] = [];
+    for (const line of bulkText.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.toLowerCase().startsWith("learner_code")) continue;
+      const [codeRaw, statusRaw] = trimmed.split(",");
+      const code = (codeRaw ?? "").trim().toLowerCase();
+      const st = (statusRaw ?? "").trim();
+      if (!code) continue;
+      const id = byCode.get(code);
+      if (!id) { bad.push(code); continue; }
+      if (!STATUSES.includes(st as Status)) { bad.push(`${code} (invalid status '${st}')`); continue; }
+      next[id] = st as Status;
+      applied += 1;
+    }
+    if (!applied && bad.length) { setBulkErr("No rows applied. Check learner codes and statuses."); return; }
+    setMarks(next);
+    setBulkOpen(false);
+    setBulkText("");
+    toast.success("Bulk attendance applied", `${applied} learner(s) updated${bad.length ? ` · ${bad.length} row(s) skipped` : ""}. Review and save.`);
+  };
+
   return (
     <>
       <PageHeader
@@ -142,6 +174,15 @@ export function AttendancePage({ role }: { role: Role }) {
             actions={
               canEdit && sheet.data && sheet.data.rows.length > 0 ? (
                 <>
+                  <Button size="sm" variant="outline" onClick={() => setPlaceholder("qr")}>
+                    <QrCode /> QR check-in
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setPlaceholder("otp")}>
+                    <KeyRound /> OTP check-in
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => { setBulkErr(null); setBulkOpen(true); }}>
+                    <FileUp /> Bulk upload
+                  </Button>
                   <Button size="sm" variant="outline" onClick={() => setMarks(Object.fromEntries(sheet.data!.rows.map((r) => [r.learner_id, "Present" as Status])))}>
                     <CheckCheck /> Mark All Present
                   </Button>
@@ -243,6 +284,44 @@ export function AttendancePage({ role }: { role: Role }) {
           )}
         </Card>
       </div>
+
+      <Dialog
+        open={bulkOpen}
+        onOpenChange={setBulkOpen}
+        title="Bulk attendance upload"
+        description="Paste CSV rows: learner_code,status — e.g. SCIB-EMP-5101,Present. Matching learners are marked on the sheet; review then save."
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setBulkOpen(false)}>Cancel</Button>
+            <Button variant="primary" onClick={applyBulk} disabled={!bulkText.trim()}>Apply to sheet</Button>
+          </>
+        }
+      >
+        {bulkErr && <Alert tone="bad" className="mb-3">{bulkErr}</Alert>}
+        <Alert tone="info" className="mb-3">
+          Accepted statuses: Present, Absent, Late, Excused. The first line may be a header and is skipped.
+        </Alert>
+        <textarea
+          className="h-44 w-full rounded-md border border-line bg-white p-3 font-mono text-[12.5px] focus:border-brand-500 focus:outline-none"
+          placeholder={"learner_code,status\nSCIB-EMP-5101,Present\nSCIB-EMP-5102,Absent"}
+          value={bulkText}
+          onChange={(e) => setBulkText(e.target.value)}
+          aria-label="Bulk attendance CSV"
+        />
+      </Dialog>
+
+      <Dialog
+        open={placeholder !== null}
+        onOpenChange={(o) => !o && setPlaceholder(null)}
+        title={placeholder === "qr" ? "QR check-in (demo placeholder)" : "OTP check-in (demo placeholder)"}
+        footer={<Button variant="primary" onClick={() => setPlaceholder(null)}>Close</Button>}
+      >
+        <Alert tone="info">
+          {placeholder === "qr"
+            ? "Learners would scan a session QR code shown on the trainer's screen; the portal would mark them Present via the NDU/mobile integration. No QR service is wired in this prototype — use the sheet or bulk upload to record attendance."
+            : "Learners would receive a one-time code (SMS/email) and submit it to check in. No OTP provider is wired in this prototype — use the sheet or bulk upload to record attendance."}
+        </Alert>
+      </Dialog>
     </>
   );
 }

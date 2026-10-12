@@ -76,7 +76,7 @@ def sync_progress(db: Session, user: User, learner_id: int | None = None) -> dic
     stmt = select(NduEnrollment)
     if learner_id:
         stmt = stmt.where(NduEnrollment.learner_id == learner_id)
-    ok = 0
+    ok = fail = 0
     for ne in db.scalars(stmt).all():
         prog = db.scalar(select(LearnerProgress).where(
             LearnerProgress.learner_id == ne.learner_id, LearnerProgress.course_id == ne.course_id))
@@ -87,14 +87,15 @@ def sync_progress(db: Session, user: User, learner_id: int | None = None) -> dic
         ne.ndu_progress_pct = prog.overall_pct
         ne.progress_synced = res.success
         ne.last_synced_at = utcnow()
-        ok += 1
+        ok += res.success
+        fail += not res.success
         if learner_id:
             _log(db, user, "Progress Sync", learner_id=ne.learner_id, course_id=ne.course_id, field="progress_pct",
                  old=f"{old:.0f}%", new=f"{prog.overall_pct:.0f}%", success=res.success, message=res.message)
     if not learner_id:
-        _log(db, user, "Progress Sync", field="progress_pct", success=True,
-             message=f"Progress pushed for {ok} enrolment(s) (demo)", records=ok)
-    return {"synced": ok, "failed": 0}
+        _log(db, user, "Progress Sync", field="progress_pct", success=fail == 0,
+             message=f"Progress pushed for {ok} enrolment(s), {fail} failed (demo)", records=ok + fail)
+    return {"synced": ok, "failed": fail}
 
 
 def sync_completion(db: Session, user: User, learner_id: int | None = None) -> dict:
@@ -102,7 +103,7 @@ def sync_completion(db: Session, user: User, learner_id: int | None = None) -> d
     stmt = select(NduEnrollment)
     if learner_id:
         stmt = stmt.where(NduEnrollment.learner_id == learner_id)
-    ok = 0
+    ok = fail = 0
     for ne in db.scalars(stmt).all():
         rec = db.scalar(select(CompletionRecord).where(
             CompletionRecord.learner_id == ne.learner_id, CompletionRecord.course_id == ne.course_id))
@@ -111,10 +112,11 @@ def sync_completion(db: Session, user: User, learner_id: int | None = None) -> d
         res = adapter.push_completion(ne.ndu_learner_ref, ne.ndu_course_ref, rec.status)
         ne.completion_synced = res.success
         ne.last_synced_at = utcnow()
-        ok += 1
-    _log(db, user, "Completion Sync", learner_id=learner_id, field="completion_status", success=True,
-         message=f"Completion status pushed for {ok} enrolment(s) (demo)", records=ok)
-    return {"synced": ok, "failed": 0}
+        ok += res.success
+        fail += not res.success
+    _log(db, user, "Completion Sync", learner_id=learner_id, field="completion_status", success=fail == 0,
+         message=f"Completion status pushed for {ok} enrolment(s), {fail} failed (demo)", records=ok + fail)
+    return {"synced": ok, "failed": fail}
 
 
 def simulate_update(db: Session, user: User, enrollment: CourseEnrollment) -> dict:

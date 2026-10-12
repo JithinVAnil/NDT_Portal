@@ -73,8 +73,7 @@ export function NduPage() {
 
   React.useEffect(() => {
     if (!selected && active.length) {
-      const demo = active.find((e) => e.learner === "Arjun Mehta") ?? active[0];
-      setSelected(String(demo.enrollment_id));
+      setSelected(String(active[0].enrollment_id));
     }
   }, [active, selected]);
 

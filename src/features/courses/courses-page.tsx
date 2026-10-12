@@ -94,7 +94,7 @@ export function CourseDetailPage() {
     <>
       <PageHeader
         title={c.title}
-        badge={<Badge tone={c.level === "Foundation" ? "info" : "violet"}>{c.level}</Badge>}
+        badge={<Badge tone={c.level === "Foundation" ? "info" : "violet"}>{c.level} · {c.version} · {c.delivery_mode}</Badge>}
         description={c.description ?? undefined}
         breadcrumbs={[{ label: "Administrator" }, { label: "Courses", href: "/admin/courses" }, { label: c.code }]}
         actions={<Button variant="outline" onClick={() => setOpen(true)}><Plus /> Add module</Button>}
@@ -112,6 +112,8 @@ export function CourseDetailPage() {
                 cols={1}
                 items={[
                   ["Course code", c.code],
+                  ["Version", c.version],
+                  ["Delivery mode", c.delivery_mode],
                   ["NDU course ref (demo)", <span key="n" className="font-mono">{c.ndu_course_ref}</span>],
                   ["Planned learning hours", `${c.planned_hours} h`],
                   ["Recorded video target", `${c.target_video_hours} h`],

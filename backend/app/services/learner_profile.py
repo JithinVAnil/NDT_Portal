@@ -162,7 +162,8 @@ def course_tree(db: Session, course_id: int, learner_id: int | None = None) -> d
     return {
         "course": {
             "id": course.id, "code": course.code, "title": course.title, "short_title": course.short_title,
-            "description": course.description, "level": course.level, "planned_hours": course.planned_hours,
+            "description": course.description, "level": course.level, "version": course.version,
+            "delivery_mode": course.delivery_mode, "planned_hours": course.planned_hours,
             "target_video_hours": course.target_video_hours, "min_qualification": course.min_qualification,
             "target_audience": course.target_audience, "ndu_course_ref": course.ndu_course_ref,
             "pass_percentage": course.pass_percentage, "min_attendance": course.min_attendance,

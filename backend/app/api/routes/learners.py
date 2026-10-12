@@ -61,15 +61,34 @@ def qualifications(user: User = Depends(require_admin_or_department)):
 
 
 @router.get("/import/template")
-def import_template(user: User = Depends(require_admin_or_department)):
+def import_template(user: User = Depends(require_admin_or_department), format: str = "csv"):
+    dept = user.department.code if user.department else "SCIB"
+    sample_rows = [
+        [f"{dept}-EMP-5101", "Aditi Rao", "aditi.rao@demo-gov.local", "9876500011", "Assistant Section Officer",
+         "Graduate", dept, "New Delhi", "CSA"],
+        [f"{dept}-EMP-5102", "Farhan Qureshi", "farhan.q@demo-gov.local", "9876500012", "Technical Officer",
+         "Graduate (Engineering/IT)", dept, "New Delhi", "CLF"],
+    ]
+    if format == "xlsx":
+        import io as _io
+
+        from openpyxl import Workbook
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Learners"
+        ws.append(IMPORT_COLUMNS)
+        for r in sample_rows:
+            ws.append(r)
+        buf = _io.BytesIO()
+        wb.save(buf)
+        return StreamingResponse(iter([buf.getvalue()]), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                 headers={"Content-Disposition": "attachment; filename=learner_import_template.xlsx"})
     buf = io.StringIO()
     w = csv.writer(buf)
     w.writerow(IMPORT_COLUMNS)
-    dept = user.department.code if user.department else "SCIB"
-    w.writerow([f"{dept}-EMP-5101", "Aditi Rao", "aditi.rao@demo-gov.local", "9876500011", "Assistant Section Officer",
-                "Graduate", dept, "New Delhi", "CSA"])
-    w.writerow([f"{dept}-EMP-5102", "Farhan Qureshi", "farhan.q@demo-gov.local", "9876500012", "Technical Officer",
-                "Graduate (Engineering/IT)", dept, "New Delhi", "CLF"])
+    for r in sample_rows:
+        w.writerow(r)
     return StreamingResponse(iter([buf.getvalue()]), media_type="text/csv",
                              headers={"Content-Disposition": "attachment; filename=learner_import_template.csv"})
 

@@ -24,6 +24,33 @@ from app.models.course import Assessment, Course, Practical
 from app.models.org import Department, Learner, User
 
 
+class TrainingVenue(TimestampMixin, Base):
+    """Training venue master: physical centres where offline training is conducted."""
+
+    __tablename__ = "training_venues"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    code: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    city: Mapped[Optional[str]] = mapped_column(String(120))
+    address: Mapped[Optional[str]] = mapped_column(Text)
+    capacity: Mapped[int] = mapped_column(Integer, default=40)
+    facilities: Mapped[Optional[str]] = mapped_column(String(400))  # e.g. "Projector, Lab, Internet"
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+
+class Trainer(TimestampMixin, Base):
+    """Trainer master: instructors mapped to batches."""
+
+    __tablename__ = "trainers"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    code: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, index=True)
+    full_name: Mapped[str] = mapped_column(String(150), nullable=False)
+    email: Mapped[Optional[str]] = mapped_column(String(200))
+    expertise: Mapped[Optional[str]] = mapped_column(String(300))
+    organization: Mapped[Optional[str]] = mapped_column(String(200))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+
 class Batch(TimestampMixin, Base):
     __tablename__ = "batches"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -33,6 +60,8 @@ class Batch(TimestampMixin, Base):
     department_id: Mapped[Optional[int]] = mapped_column(ForeignKey("departments.id"), index=True)  # null = multi-department
     mode: Mapped[str] = mapped_column(String(20), nullable=False)  # Physical / Digital / Hybrid
     location: Mapped[Optional[str]] = mapped_column(String(150))
+    venue_id: Mapped[Optional[int]] = mapped_column(ForeignKey("training_venues.id"), index=True)
+    trainer_id: Mapped[Optional[int]] = mapped_column(ForeignKey("trainers.id"), index=True)
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date] = mapped_column(Date, nullable=False)
     capacity: Mapped[int] = mapped_column(Integer, default=30)
@@ -41,6 +70,8 @@ class Batch(TimestampMixin, Base):
 
     course: Mapped[Course] = relationship(lazy="joined")
     department: Mapped[Optional[Department]] = relationship(lazy="joined")
+    venue: Mapped[Optional[TrainingVenue]] = relationship(lazy="joined")
+    trainer: Mapped[Optional[Trainer]] = relationship(lazy="joined")
 
 
 class Nomination(TimestampMixin, Base):

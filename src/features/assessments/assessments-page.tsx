@@ -81,8 +81,7 @@ function RecordTab() {
 
   React.useEffect(() => {
     if (courses.data?.length && !course) {
-      const clf = courses.data.find((c) => c.title.includes("Cloud")) ?? courses.data[0];
-      setCourse(String(clf.id));
+      setCourse(String(courses.data[0].id));
     }
   }, [courses.data, course]);
   React.useEffect(() => {
@@ -224,8 +223,7 @@ function PracticalsTab({ role }: { role: Role }) {
   const [pid, setPid] = React.useState("");
   React.useEffect(() => {
     if (!pid && practicals.data?.length) {
-      const p = practicals.data.find((x) => x.code === "PR-CLF-01") ?? practicals.data[0];
-      setPid(String(p.id));
+      setPid(String(practicals.data[0].id));
     }
   }, [practicals.data, pid]);
   const roster = useApi<{ practical: Practical; rows: { learner_id: number; learner: string; learner_code: string; batch: string | null; submission: Submission | null }[] }>(
@@ -240,7 +238,7 @@ function PracticalsTab({ role }: { role: Role }) {
 
   const openEval = (r: { learner_id: number; learner: string; submission: Submission | null }) => {
     setEvalFor(r);
-    setStatus(r.submission?.status === "Evaluated" ? "Evaluated" : "Evaluated");
+    setStatus(r.submission?.status ?? "Evaluated");
     setRemarks(r.submission?.remarks ?? "");
     setRubric(Object.fromEntries((p?.rubric?.criteria ?? []).map((c) => [c.name, String(r.submission?.rubric_scores?.[c.name] ?? "")])));
   };

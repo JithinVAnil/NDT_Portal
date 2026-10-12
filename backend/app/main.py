@@ -21,6 +21,7 @@ from app.api.routes import (
     departments,
     learner_portal,
     learners,
+    masters,
     ndu,
     nominations,
     progress,
@@ -103,8 +104,8 @@ async def unhandled(request: Request, exc: Exception):
 
 
 API = "/api"
-for r in (auth, dashboard, departments, users, learners, nominations, courses, content, batches, attendance, results,
-          progress, ndu, reports, system, learner_portal):
+for r in (auth, dashboard, departments, users, learners, nominations, courses, content, batches, masters, attendance,
+          results, progress, ndu, reports, system, learner_portal):
     app.include_router(r.router, prefix=API)
 
 settings.media_dir.mkdir(parents=True, exist_ok=True)

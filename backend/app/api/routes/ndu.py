@@ -6,9 +6,10 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.deps import bad_request, not_found, require_admin
+from app.core.deps import bad_request, get_current_user, not_found, require_admin
 from app.integrations.ndu import get_adapter
-from app.models import CourseEnrollment, LearnerProgress, NduEnrollment, NduSyncLog, User
+from app.models import ContentItem, CourseEnrollment, LearnerProgress, NduEnrollment, NduSyncLog, User
+from app.models.base import RoleCode
 from app.repositories import serializers as ser
 from app.schemas.requests import NduLearnerRequest, NduSimulateRequest
 from app.services import audit, ndu_service
@@ -111,3 +112,35 @@ def simulate_update(body: NduSimulateRequest, request: Request, user: User = Dep
                  details=f"Progress {res['old_progress']:.0f}% → {res['new_progress']:.0f}% (demo)", request=request)
     db.commit()
     return res
+
+
+@router.get("/playback/{content_id}")
+def request_playback(content_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Learner requests video playback — the portal does not host or play video itself.
+
+    The demo adapter returns a time-limited NDU playback URL placeholder. A real
+    adapter will proxy official NDU signed-URL issuance once credentials exist.
+    """
+    content = db.get(ContentItem, content_id)
+    if not content or content.content_type != "Video":
+        raise not_found("Video content")
+    learner_ref = None
+    course_ref = content.course.ndu_course_ref or content.course.code
+    if user.learner_id:
+        enr = db.scalar(select(CourseEnrollment).where(CourseEnrollment.learner_id == user.learner_id,
+                                                       CourseEnrollment.course_id == content.course_id))
+        learner_ref = user.learner.learner_code
+        if not enr:
+            raise bad_request("You are not enrolled in this course")
+    elif user.role_code != RoleCode.ADMIN:
+        raise bad_request("Playback is only available to enrolled learners")
+    else:
+        learner_ref = "DEMO-ADMIN-PREVIEW"
+    res = get_adapter().request_playback(learner_ref, course_ref, content.code)
+    db.add(NduSyncLog(sync_type="playback", direction="OUTBOUND", learner_id=user.learner_id,
+                      course_id=content.course_id, field="playback_token",
+                      result="Success" if res.success else "Failure", message=res.message,
+                      records_processed=1, triggered_by_name=user.full_name))
+    db.commit()
+    return {"success": res.success, "message": res.message, "content_code": content.code,
+            "course_ref": course_ref, "learner_ref": learner_ref, **res.payload}

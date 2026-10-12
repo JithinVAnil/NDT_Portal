@@ -19,6 +19,8 @@ class Course(TimestampMixin, Base):
     short_title: Mapped[str] = mapped_column(String(60), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text)
     level: Mapped[str] = mapped_column(String(40), default="Foundation")
+    version: Mapped[str] = mapped_column(String(20), default="1.0")
+    delivery_mode: Mapped[str] = mapped_column(String(40), default="Blended")  # Online / Classroom / Hybrid / Blended
     planned_hours: Mapped[float] = mapped_column(Float, default=0)
     target_video_hours: Mapped[float] = mapped_column(Float, default=0)
     prerequisite_course_id: Mapped[Optional[int]] = mapped_column(ForeignKey("courses.id"))

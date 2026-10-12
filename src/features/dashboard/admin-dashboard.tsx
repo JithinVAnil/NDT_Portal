@@ -74,6 +74,7 @@ export function CourseCards({ courses, base }: { courses: CourseCard[]; base?: s
               <div>
                 <Badge tone={c.level === "Foundation" ? "info" : "violet"}>{c.level}</Badge>
                 <h3 className="mt-2 text-[14.5px] font-semibold text-navy-900">{c.title}</h3>
+                <p className="mt-0.5 text-[11.5px] text-muted">{c.version} · {c.delivery_mode}</p>
               </div>
               <span className="rounded border border-line px-1.5 py-0.5 font-mono text-[11px] text-muted">{c.code}</span>
             </div>
@@ -269,6 +270,24 @@ export function AdminDashboard() {
                     { key: "average_score", name: "Avg score %" },
                   ]}
                 />
+                <ul className="mt-3 space-y-1">
+                  {(data.charts.department_performance ?? []).map((d) => (
+                    <li key={d.department_id}>
+                      <Link
+                        href={`/admin/learners?department=${d.department_id}`}
+                        className="flex items-center justify-between rounded-md border border-line px-3 py-1.5 text-[12.5px] hover:border-brand-500"
+                      >
+                        <span>
+                          <span className="font-medium">{d.name}</span>{" "}
+                          <span className="font-mono text-[11px] text-muted">{d.department}</span>
+                        </span>
+                        <span className="tabular text-muted">
+                          {d.learners} learners · {pct(d.average_progress)} progress → <span className="text-brand-600">view learners</span>
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </CardBody>
             </Card>
           </div>

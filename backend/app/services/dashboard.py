@@ -209,7 +209,7 @@ def department_performance(db: Session) -> list[dict]:
     for d in db.scalars(select(Department).where(Department.is_active.is_(True)).order_by(Department.code)).all():
         k = kpis(db, d.id)
         rows.append({
-            "department": d.code, "name": d.name, "learners": k["learners"],
+            "department_id": d.id, "department": d.code, "name": d.name, "learners": k["learners"],
             "average_progress": k["average_progress"] or 0, "attendance_rate": k["attendance_rate"] or 0,
             "average_score": k["average_score"] or 0, "completed": k["completed"], "at_risk": k["at_risk_learners"],
         })
@@ -238,6 +238,7 @@ def course_cards(db: Session, dept_id: int | None = None) -> list[dict]:
         practicals = db.scalar(select(func.count(Practical.id)).where(Practical.course_id == c.id)) or 0
         cards.append({
             "id": c.id, "code": c.code, "title": c.title, "short_title": c.short_title, "level": c.level,
+            "version": c.version, "delivery_mode": c.delivery_mode,
             "learners": learners, "active": started,
             "completion_pct": round(100 * completed / started, 1) if started else 0, "completed": completed,
             "average_score": round(float(avg), 1) if avg is not None else None,

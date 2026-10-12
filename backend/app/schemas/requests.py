@@ -33,7 +33,7 @@ def _mobile(v: Optional[str]) -> Optional[str]:
 
 class LoginRequest(BaseModel):
     email: str = Field(min_length=3, max_length=200)
-    password: str = Field(min_length=1, max_length=200)
+    password: str = Field(min_length=1, max_length=72)
 
     @field_validator("email")
     @classmethod
@@ -144,7 +144,7 @@ class UserIn(BaseModel):
     department_id: Optional[int] = None
     learner_id: Optional[int] = None
     designation: Optional[str] = Field(default=None, max_length=120)
-    password: Optional[str] = Field(default=None, min_length=8, max_length=100)
+    password: Optional[str] = Field(default=None, min_length=8, max_length=72)
 
     @field_validator("email")
     @classmethod
@@ -156,7 +156,7 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = Field(default=None, min_length=2, max_length=150)
     designation: Optional[str] = Field(default=None, max_length=120)
     is_active: Optional[bool] = None
-    password: Optional[str] = Field(default=None, min_length=8, max_length=100)
+    password: Optional[str] = Field(default=None, min_length=8, max_length=72)
 
 
 class BatchIn(BaseModel):
@@ -166,6 +166,8 @@ class BatchIn(BaseModel):
     department_id: Optional[int] = None
     mode: TrainingMode
     location: Optional[str] = Field(default=None, max_length=150)
+    venue_id: Optional[int] = None
+    trainer_id: Optional[int] = None
     start_date: date
     end_date: date
     capacity: int = Field(ge=1, le=500)
@@ -297,11 +299,53 @@ class CourseUpdate(BaseModel):
     title: Optional[str] = Field(default=None, min_length=3, max_length=200)
     description: Optional[str] = Field(default=None, max_length=4000)
     level: Optional[str] = Field(default=None, max_length=40)
+    version: Optional[str] = Field(default=None, max_length=20)
+    delivery_mode: Optional[str] = Field(default=None, max_length=40)
     planned_hours: Optional[float] = Field(default=None, ge=0, le=1000)
     target_video_hours: Optional[float] = Field(default=None, ge=0, le=100)
     min_qualification: Optional[str] = Field(default=None, max_length=120)
     pass_percentage: Optional[float] = Field(default=None, ge=0, le=100)
     min_attendance: Optional[float] = Field(default=None, ge=0, le=100)
+
+
+class VenueIn(BaseModel):
+    code: str = Field(min_length=2, max_length=20)
+    name: str = Field(min_length=3, max_length=200)
+    city: Optional[str] = Field(default=None, max_length=120)
+    address: Optional[str] = Field(default=None, max_length=1000)
+    capacity: int = Field(default=40, ge=1, le=2000)
+    facilities: Optional[str] = Field(default=None, max_length=400)
+    is_active: bool = True
+
+    @field_validator("code")
+    @classmethod
+    def _c(cls, v: str) -> str:
+        v = v.strip().upper()
+        if not re.match(r"^[A-Z0-9-]{2,20}$", v):
+            raise ValueError("Venue code may contain only letters, digits and hyphens")
+        return v
+
+
+class TrainerIn(BaseModel):
+    code: str = Field(min_length=2, max_length=20)
+    full_name: str = Field(min_length=2, max_length=150)
+    email: Optional[str] = Field(default=None, max_length=200)
+    expertise: Optional[str] = Field(default=None, max_length=300)
+    organization: Optional[str] = Field(default=None, max_length=200)
+    is_active: bool = True
+
+    @field_validator("code")
+    @classmethod
+    def _c(cls, v: str) -> str:
+        v = v.strip().upper()
+        if not re.match(r"^[A-Z0-9-]{2,20}$", v):
+            raise ValueError("Trainer code may contain only letters, digits and hyphens")
+        return v
+
+    @field_validator("email")
+    @classmethod
+    def _e(cls, v: Optional[str]) -> Optional[str]:
+        return _email(v) if v else v
 
 
 class PracticalIn(BaseModel):

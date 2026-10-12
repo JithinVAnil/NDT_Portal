@@ -18,6 +18,8 @@ from app.models import (
     Notification,
     Practical,
     PracticalSubmission,
+    Trainer,
+    TrainingVenue,
     User,
 )
 from app.models.base import PRODUCTION_STAGES, QC_FIELDS, VIDEO_RESTRICTIONS
@@ -88,6 +90,9 @@ def batch(b: Batch, enrolled: int | None = None) -> dict:
         "department_code": b.department.code if b.department else None,
         "mode": b.mode, "location": b.location, "start_date": iso(b.start_date), "end_date": iso(b.end_date),
         "capacity": b.capacity, "instructor": b.instructor, "status": b.status, "enrolled": enrolled,
+        "venue_id": b.venue_id, "venue": b.venue.name if b.venue else None,
+        "venue_city": b.venue.city if b.venue else None,
+        "trainer_id": b.trainer_id, "trainer": b.trainer.full_name if b.trainer else None,
     }
 
 
@@ -251,4 +256,20 @@ def sync_log(s: NduSyncLog) -> dict:
         "course": s.course.title if s.course else "All courses", "field": s.field,
         "old_value": s.old_value, "new_value": s.new_value, "result": s.result, "message": s.message,
         "records_processed": s.records_processed, "triggered_by": s.triggered_by_name,
+    }
+
+
+def venue(v: TrainingVenue) -> dict:
+    return {
+        "id": v.id, "code": v.code, "name": v.name, "city": v.city, "address": v.address,
+        "capacity": v.capacity, "facilities": v.facilities, "is_active": v.is_active,
+        "created_at": iso(v.created_at),
+    }
+
+
+def trainer(t: Trainer) -> dict:
+    return {
+        "id": t.id, "code": t.code, "full_name": t.full_name, "email": t.email,
+        "expertise": t.expertise, "organization": t.organization, "is_active": t.is_active,
+        "created_at": iso(t.created_at),
     }

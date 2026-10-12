@@ -170,6 +170,20 @@ export function SettingsPage() {
   }, [data]);
 
   const save = async (key: string, value: unknown) => {
+    if (key === "risk_thresholds") {
+      const bad = Object.entries(value as Record<string, number>).find(([, v]) => !Number.isFinite(v) || v < 0);
+      if (bad) {
+        toast.error("Not saved", `${RISK_LABELS[bad[0]] ?? bad[0]} must be a number of 0 or more.`);
+        return;
+      }
+    }
+    if (key === "completion_rules") {
+      const att = (value as Record<string, number | boolean>).min_attendance;
+      if (typeof att !== "number" || !Number.isFinite(att) || att < 0 || att > 100) {
+        toast.error("Not saved", "Minimum attendance must be a number between 0 and 100.");
+        return;
+      }
+    }
     setBusy(key);
     try {
       await api(`/settings/${key}`, { method: "PUT", body: { value } });
@@ -247,7 +261,7 @@ export function SettingsPage() {
             <CardBody className="grid gap-3 sm:grid-cols-2">
               {Object.entries(risk).map(([k, v]) => (
                 <Field key={k} label={RISK_LABELS[k] ?? k} htmlFor={`r-${k}`}>
-                  <Input id={`r-${k}`} type="number" value={v} onChange={(e) => setRisk((s) => ({ ...s, [k]: Number(e.target.value) }))} />
+                  <Input id={`r-${k}`} type="number" min={0} value={Number.isFinite(v) ? v : ""} onChange={(e) => setRisk((s) => ({ ...s, [k]: e.target.value === "" ? Number.NaN : Number(e.target.value) }))} />
                 </Field>
               ))}
             </CardBody>
@@ -262,7 +276,7 @@ export function SettingsPage() {
               <Checkbox checked={!!comp.require_all_assessments_passed} onChange={(v) => setComp({ ...comp, require_all_assessments_passed: v })} label="All assessments passed" />
               <Checkbox checked={!!comp.require_all_practicals} onChange={(v) => setComp({ ...comp, require_all_practicals: v })} label="All practicals completed" />
               <Field label="Minimum attendance %" htmlFor="c-att" className="w-48">
-                <Input id="c-att" type="number" value={comp.min_attendance === undefined ? "" : Number(comp.min_attendance)} onChange={(e) => setComp({ ...comp, min_attendance: Number(e.target.value) })} />
+                <Input id="c-att" type="number" min={0} max={100} value={typeof comp.min_attendance === "number" && Number.isFinite(comp.min_attendance) ? comp.min_attendance : ""} onChange={(e) => setComp({ ...comp, min_attendance: e.target.value === "" ? Number.NaN : Number(e.target.value) })} />
               </Field>
             </CardBody>
           </Card>

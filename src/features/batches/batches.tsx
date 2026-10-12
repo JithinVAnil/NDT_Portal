@@ -19,14 +19,16 @@ import { fmtDate, pct } from "@/lib/utils";
 import type { Batch, Role } from "@/types/api";
 
 const EMPTY = {
-  code: "", name: "", course_id: "", department_id: "", mode: "Digital", location: "", start_date: "", end_date: "",
-  capacity: "30", instructor: "", status: "Planned",
+  code: "", name: "", course_id: "", department_id: "", mode: "Digital", location: "", venue_id: "", trainer_id: "",
+  start_date: "", end_date: "", capacity: "30", instructor: "", status: "Planned",
 };
 
 function BatchForm({ open, onOpenChange, batch, onSaved }: { open: boolean; onOpenChange: (o: boolean) => void; batch?: Batch | null; onSaved: (b: Batch) => void }) {
   const toast = useToast();
   const courses = useApi<{ id: number; title: string; code: string }[]>(open ? "/courses/options" : null);
   const depts = useApi<{ id: number; code: string; name: string }[]>(open ? "/departments/options" : null);
+  const venues = useApi<{ id: number; code: string; name: string }[]>(open ? "/masters/venues/options" : null);
+  const trainers = useApi<{ id: number; code: string; name: string }[]>(open ? "/masters/trainers/options" : null);
   const [f, setF] = React.useState(EMPTY);
   const [err, setErr] = React.useState<string | null>(null);
   const [saving, setSaving] = React.useState(false);
@@ -37,7 +39,9 @@ function BatchForm({ open, onOpenChange, batch, onSaved }: { open: boolean; onOp
       batch
         ? {
             code: batch.code, name: batch.name, course_id: String(batch.course_id), department_id: batch.department_id ? String(batch.department_id) : "",
-            mode: batch.mode, location: batch.location ?? "", start_date: batch.start_date, end_date: batch.end_date, capacity: String(batch.capacity),
+            mode: batch.mode, location: batch.location ?? "", venue_id: batch.venue_id ? String(batch.venue_id) : "",
+            trainer_id: batch.trainer_id ? String(batch.trainer_id) : "",
+            start_date: batch.start_date, end_date: batch.end_date, capacity: String(batch.capacity),
             instructor: batch.instructor ?? "", status: batch.status,
           }
         : EMPTY,
@@ -49,8 +53,9 @@ function BatchForm({ open, onOpenChange, batch, onSaved }: { open: boolean; onOp
     setErr(null);
     try {
       const body = {
-        ...f, course_id: Number(f.course_id), department_id: f.department_id ? Number(f.department_id) : null, capacity: Number(f.capacity),
-        location: f.location || null, instructor: f.instructor || null,
+        ...f, course_id: Number(f.course_id), department_id: f.department_id ? Number(f.department_id) : null,
+        venue_id: f.venue_id ? Number(f.venue_id) : null, trainer_id: f.trainer_id ? Number(f.trainer_id) : null,
+        capacity: Number(f.capacity), location: f.location || null, instructor: f.instructor || null,
       };
       const res = batch
         ? await api<Batch>(`/batches/${batch.id}`, { method: "PUT", body })
@@ -95,6 +100,18 @@ function BatchForm({ open, onOpenChange, batch, onSaved }: { open: boolean; onOp
           </Select>
         </Field>
         <Field label="Location" htmlFor="b-loc"><Input id="b-loc" value={f.location} onChange={set("location")} /></Field>
+        <Field label="Training venue" htmlFor="b-venue" hint="For physical / hybrid batches">
+          <Select id="b-venue" value={f.venue_id} onChange={set("venue_id")}>
+            <option value="">Not assigned</option>
+            {(venues.data ?? []).map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
+          </Select>
+        </Field>
+        <Field label="Trainer" htmlFor="b-trainer">
+          <Select id="b-trainer" value={f.trainer_id} onChange={set("trainer_id")}>
+            <option value="">Not assigned</option>
+            {(trainers.data ?? []).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </Select>
+        </Field>
         <Field label="Start date" htmlFor="b-s" required><Input id="b-s" type="date" value={f.start_date} onChange={set("start_date")} /></Field>
         <Field label="End date" htmlFor="b-e" required><Input id="b-e" type="date" value={f.end_date} onChange={set("end_date")} /></Field>
         <Field label="Capacity" htmlFor="b-cap" required><Input id="b-cap" type="number" min={1} value={f.capacity} onChange={set("capacity")} /></Field>
@@ -129,7 +146,8 @@ export function BatchesPage({ role }: { role: Role }) {
     },
     { accessorKey: "course", header: "Course" },
     { accessorKey: "mode", header: "Mode", cell: ({ row }) => <Badge tone={row.original.mode === "Digital" ? "info" : row.original.mode === "Hybrid" ? "violet" : "neutral"}>{row.original.mode}</Badge> },
-    { accessorKey: "location", header: "Location", cell: ({ row }) => <span className="text-[12.5px]">{row.original.location}</span> },
+    { accessorKey: "location", header: "Location", cell: ({ row }) => <span className="text-[12.5px]">{row.original.venue ? `${row.original.venue}${row.original.venue_city ? ` (${row.original.venue_city})` : ""}` : row.original.location}</span> },
+    { accessorKey: "trainer", header: "Trainer", cell: ({ row }) => <span className="text-[12.5px]">{row.original.trainer ?? <span className="text-subtle">—</span>}</span> },
     { accessorKey: "start_date", header: "Start", cell: ({ row }) => fmtDate(row.original.start_date) },
     { accessorKey: "end_date", header: "End", cell: ({ row }) => fmtDate(row.original.end_date) },
     {
@@ -259,7 +277,8 @@ export function BatchDetailPage({ role }: { role: Role }) {
                 items={[
                   ["Course", b.course],
                   ["Mode", b.mode],
-                  ["Location", b.location],
+                  ["Location", b.venue ? `${b.venue}${b.venue_city ? ` (${b.venue_city})` : ""}` : b.location],
+                  ["Trainer", b.trainer ?? b.instructor],
                   ["Schedule", `${fmtDate(b.start_date)} – ${fmtDate(b.end_date)}`],
                   ["Capacity", `${b.enrolled}/${b.capacity} enrolled`],
                   ["Instructor", b.instructor],

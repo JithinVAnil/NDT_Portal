@@ -50,6 +50,11 @@ export interface Batch {
   department_code: string | null;
   mode: string;
   location: string | null;
+  venue_id: number | null;
+  venue: string | null;
+  venue_city: string | null;
+  trainer_id: number | null;
+  trainer: string | null;
   start_date: string;
   end_date: string;
   capacity: number;
@@ -57,6 +62,51 @@ export interface Batch {
   status: string;
   enrolled: number | null;
   department_learners?: number;
+}
+
+export interface TrainingVenue {
+  id: number;
+  code: string;
+  name: string;
+  city: string | null;
+  address: string | null;
+  capacity: number;
+  facilities: string | null;
+  is_active: boolean;
+  batches: number;
+  created_at: string;
+}
+
+export interface Trainer {
+  id: number;
+  code: string;
+  full_name: string;
+  email: string | null;
+  expertise: string | null;
+  organization: string | null;
+  is_active: boolean;
+  batches: number;
+  created_at: string;
+}
+
+export interface CalendarEvent {
+  id: number;
+  code: string;
+  name: string;
+  course: string;
+  course_code: string;
+  mode: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+  location: string | null;
+  venue: string | null;
+  venue_city: string | null;
+  trainer: string | null;
+  instructor: string | null;
+  capacity: number;
+  enrolled: number;
+  department: string;
 }
 
 export interface Nomination {
@@ -293,6 +343,8 @@ export interface CourseTree {
     short_title: string;
     description: string | null;
     level: string;
+    version: string;
+    delivery_mode: string;
     planned_hours: number;
     target_video_hours: number;
     min_qualification: string | null;
@@ -423,6 +475,8 @@ export interface CourseCard {
   title: string;
   short_title: string;
   level: string;
+  version: string;
+  delivery_mode: string;
   learners: number;
   active: number;
   completion_pct: number;
@@ -487,6 +541,7 @@ export interface DashboardCharts {
   risk_distribution: { level: string; key: string; count: number }[];
   progress_distribution: { range: string; learners: number }[];
   department_performance?: {
+    department_id: number;
     department: string;
     name: string;
     learners: number;

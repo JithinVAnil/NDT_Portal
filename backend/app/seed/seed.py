@@ -47,6 +47,8 @@ from app.models import (
     Role,
     Rubric,
     TrainingSession,
+    TrainingVenue,
+    Trainer,
     User,
 )
 from app.models.base import VIDEO_RESTRICTIONS, CompletionStatus, NominationStatus as S, RoleCode, utcnow
@@ -198,7 +200,9 @@ class Seeder:
         self.modules: dict[str, list[Module]] = {}
         for c in cur.COURSES:
             course = self.add(Course(code=c["code"], title=c["title"], short_title=c["short_title"],
-                                     description=c["description"], level=c["level"], planned_hours=c["planned_hours"],
+                                     description=c["description"], level=c["level"], version=c.get("version", "1.0"),
+                                     delivery_mode=c.get("delivery_mode", "Blended"),
+                                     planned_hours=c["planned_hours"],
                                      target_video_hours=c["target_video_hours"], min_qualification=c["min_qualification"],
                                      target_audience=c["target_audience"], ndu_course_ref=f"NDU-DEMO-{c['code']}-2026",
                                      pass_percentage=50, min_attendance=75))
@@ -316,23 +320,52 @@ class Seeder:
                                  created_at=self.now - timedelta(days=45)))
         self.db.flush()
 
+    # ---------------- venues & trainers ----------------
+    def venues_trainers(self):
+        self.venue = {}
+        for code, name, city, addr, cap, fac in [
+            ("VEN-DEL", "NIELIT Demo Centre, New Delhi", "New Delhi", "Plot 3, CGO Complex, Lodhi Road, New Delhi - 110003", 60, "Projector, Lab, Internet, Recording"),
+            ("VEN-LKO", "NIELIT Demo Centre, Lucknow", "Lucknow", "Sector-B, Aliganj, Lucknow - 226024", 40, "Projector, Internet"),
+            ("VEN-BLR", "NIELIT Demo Lab, Bengaluru", "Bengaluru", "STPI Campus, Electronic City, Bengaluru - 560100", 30, "IoT Lab, Projector, Internet"),
+            ("VEN-PUN", "NIELIT Demo Lab, Pune", "Pune", "Rajiv Gandhi Infotech Park, Hinjawadi, Pune - 411057", 30, "IoT Lab, Projector"),
+            ("VEN-HYD", "NIELIT Demo Centre, Hyderabad", "Hyderabad", "Hitec City, Madhapur, Hyderabad - 500081", 40, "Projector, Lab, Internet"),
+            ("VEN-CHN", "NIELIT Demo Centre, Chennai", "Chennai", "Tidel Park, Taramani, Chennai - 600113", 40, "Projector, Lab, Internet"),
+        ]:
+            self.venue[code] = self.add(TrainingVenue(code=code, name=name, city=city, address=addr, capacity=cap, facilities=fac))
+        self.trainer = {}
+        for code, name, email, exp, org in [
+            ("TRN-MEERA", "Dr. Meera Krishnan", "meera.krishnan@nielit-demo.local", "Cyber security awareness, security culture", "NIELIT (Demo)"),
+            ("TRN-ROHIT", "Rohit Bansal", "rohit.bansal@nielit-demo.local", "Phishing analysis, email security", "NIELIT (Demo)"),
+            ("TRN-KAVYA", "Kavya Iyer", "kavya.iyer@nielit-demo.local", "IoT forensics, hardware interfacing", "NIELIT (Demo)"),
+            ("TRN-ARVIND", "Arvind Menon", "arvind.menon@nielit-demo.local", "Embedded systems, device acquisition", "NIELIT (Demo)"),
+            ("TRN-NEHA", "Neha Kulkarni", "neha.kulkarni@nielit-demo.local", "Cloud forensics, AWS/GCP investigations", "NIELIT (Demo)"),
+            ("TRN-VIKRAM", "Vikram Rathore", "vikram.rathore@nielit-demo.local", "Enterprise DFIR, incident response", "NIELIT (Demo)"),
+            ("TRN-FARAH", "Farah Siddiqui", "farah.siddiqui@nielit-demo.local", "Microsoft 365 investigations, KQL", "NIELIT (Demo)"),
+            ("TRN-SAMEER", "Dr. Sameer Joshi", "sameer.joshi@nielit-demo.local", "Digital evidence, chain of custody", "NIELIT (Demo)"),
+        ]:
+            self.trainer[code] = self.add(Trainer(code=code, full_name=name, email=email, expertise=exp, organization=org))
+        self.db.flush()
+
     # ---------------- batches ----------------
     def batches(self):
         T = TODAY
         spec = [
-            ("CYBER-AWARENESS-2026-01", "Cyber Security Awareness — Cohort 1", "CSA", "Physical", "NIELIT Demo Centre, New Delhi", -100, -50, 30, "Dr. Meera Krishnan", "Completed"),
-            ("CYBER-AWARENESS-2026-02", "Cyber Security Awareness — Cohort 2", "CSA", "Digital", "Online via NDU (Demo)", -28, 21, 40, "Rohit Bansal", "Active"),
-            ("CYBER-AWARENESS-2026-03", "Cyber Security Awareness — Cohort 3", "CSA", "Hybrid", "NIELIT Demo Centre, Lucknow", 30, 75, 40, "Rohit Bansal", "Planned"),
-            ("IOT-FORENSICS-2026-01", "IoT Forensics — Cohort 1", "IOT", "Hybrid", "NIELIT Demo Lab, Bengaluru", -35, 35, 20, "Kavya Iyer", "Active"),
-            ("IOT-FORENSICS-2026-02", "IoT Forensics — Cohort 2", "IOT", "Physical", "NIELIT Demo Lab, Pune", 40, 100, 20, "Arvind Menon", "Planned"),
-            ("CLOUD-FORENSICS-2026-01", "Cloud Forensics — Cohort 1", "CLF", "Digital", "Online via NDU (Demo)", -30, 30, 30, "Neha Kulkarni", "Active"),
-            ("CLOUD-FORENSICS-2026-02", "Cloud Forensics — Cohort 2", "CLF", "Hybrid", "NIELIT Demo Centre, New Delhi", 14, 70, 30, "Neha Kulkarni", "Planned"),
-            ("ENTERPRISE-DFIR-2026-01", "Enterprise DFIR — Cohort 1", "EDF", "Physical", "NIELIT Demo Centre, Hyderabad", -21, 42, 20, "Vikram Rathore", "Active"),
-            ("ENTERPRISE-DFIR-2026-02", "Enterprise DFIR — Cohort 2", "EDF", "Hybrid", "NIELIT Demo Centre, Chennai", 45, 105, 20, "Farah Siddiqui", "Planned"),
+            # code, name, course, mode, location, venue, trainer, start, end, cap, instructor, status
+            ("CYBER-AWARENESS-2026-01", "Cyber Security Awareness — Cohort 1", "CSA", "Physical", "NIELIT Demo Centre, New Delhi", "VEN-DEL", "TRN-MEERA", -100, -50, 30, "Dr. Meera Krishnan", "Completed"),
+            ("CYBER-AWARENESS-2026-02", "Cyber Security Awareness — Cohort 2", "CSA", "Digital", "Online via NDU (Demo)", None, "TRN-ROHIT", -28, 21, 40, "Rohit Bansal", "Active"),
+            ("CYBER-AWARENESS-2026-03", "Cyber Security Awareness — Cohort 3", "CSA", "Hybrid", "NIELIT Demo Centre, Lucknow", "VEN-LKO", "TRN-ROHIT", 30, 75, 40, "Rohit Bansal", "Planned"),
+            ("IOT-FORENSICS-2026-01", "IoT Forensics — Cohort 1", "IOT", "Hybrid", "NIELIT Demo Lab, Bengaluru", "VEN-BLR", "TRN-KAVYA", -35, 35, 20, "Kavya Iyer", "Active"),
+            ("IOT-FORENSICS-2026-02", "IoT Forensics — Cohort 2", "IOT", "Physical", "NIELIT Demo Lab, Pune", "VEN-PUN", "TRN-ARVIND", 40, 100, 20, "Arvind Menon", "Planned"),
+            ("CLOUD-FORENSICS-2026-01", "Cloud Forensics — Cohort 1", "CLF", "Digital", "Online via NDU (Demo)", None, "TRN-NEHA", -30, 30, 30, "Neha Kulkarni", "Active"),
+            ("CLOUD-FORENSICS-2026-02", "Cloud Forensics — Cohort 2", "CLF", "Hybrid", "NIELIT Demo Centre, New Delhi", "VEN-DEL", "TRN-NEHA", 14, 70, 30, "Neha Kulkarni", "Planned"),
+            ("ENTERPRISE-DFIR-2026-01", "Enterprise DFIR — Cohort 1", "EDF", "Physical", "NIELIT Demo Centre, Hyderabad", "VEN-HYD", "TRN-VIKRAM", -21, 42, 20, "Vikram Rathore", "Active"),
+            ("ENTERPRISE-DFIR-2026-02", "Enterprise DFIR — Cohort 2", "EDF", "Hybrid", "NIELIT Demo Centre, Chennai", "VEN-CHN", "TRN-FARAH", 45, 105, 20, "Farah Siddiqui", "Planned"),
         ]
         self.batch = {}
-        for code, name, ccode, mode, loc, s, e, cap, instr, status in spec:
+        for code, name, ccode, mode, loc, vcode, tcode, s, e, cap, instr, status in spec:
             self.batch[code] = self.add(Batch(code=code, name=name, course_id=self.course[ccode].id, mode=mode, location=loc,
+                                              venue_id=self.venue[vcode].id if vcode else None,
+                                              trainer_id=self.trainer[tcode].id if tcode else None,
                                               start_date=T + timedelta(days=s), end_date=T + timedelta(days=e), capacity=cap,
                                               instructor=f"{instr} (Demo Instructor)", status=status,
                                               created_at=self.now - timedelta(days=max(20, 20 - s))))
@@ -887,6 +920,7 @@ class Seeder:
         self.departments()
         self.users()
         self.curriculum()
+        self.venues_trainers()
         self.batches()
         self.sessions()
         self.onboarded_cohorts()

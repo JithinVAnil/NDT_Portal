@@ -148,6 +148,9 @@ export function BulkImport({ open, onOpenChange, onDone }: { open: boolean; onOp
             <Button variant="outline" size="sm" onClick={() => download("/learners/import/template", undefined, "learner_import_template.csv")}>
               <Download /> Download CSV template
             </Button>
+            <Button variant="outline" size="sm" onClick={() => download("/learners/import/template", { format: "xlsx" }, "learner_import_template.xlsx")}>
+              <FileSpreadsheet /> Download Excel template
+            </Button>
             <span className="text-[12px] text-muted">
               Columns: employee_id, full_name, email, mobile, designation, qualification, department_code, location, course_code
             </span>

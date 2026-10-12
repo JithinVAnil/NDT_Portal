@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FileUp, UserPlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -113,9 +113,10 @@ function AddLearner({ open, onOpenChange, onDone }: { open: boolean; onOpenChang
 
 export function LearnersPage({ role }: { role: Role }) {
   const router = useRouter();
+  const params = useSearchParams();
   const base = role === "ADMIN" ? "/admin" : "/department";
-  const [dept, setDept] = React.useState("");
-  const [status, setStatus] = React.useState("");
+  const [dept, setDept] = React.useState(params.get("department") ?? "");
+  const [status, setStatus] = React.useState(params.get("status") ?? "");
   const [openAdd, setOpenAdd] = React.useState(false);
   const [openImport, setOpenImport] = React.useState(false);
   const { data, error, loading, reload } = useApi<Learner[]>("/learners", { department_id: dept, status });

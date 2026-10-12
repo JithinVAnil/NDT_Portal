@@ -174,7 +174,7 @@ export function ProgressPage({ role }: { role: Role }) {
         description="Learner progress, at-risk identification and completion tracking."
         breadcrumbs={[{ label: role === "ADMIN" ? "Administrator" : "Department" }, { label: "Progress" }]}
       />
-      <Tabs defaultValue={params.get("risk") ? "progress" : "progress"}>
+      <Tabs defaultValue={params.get("risk") ? "risk" : "progress"}>
         <TabsList>
           <TabsTrigger value="progress">Progress</TabsTrigger>
           <TabsTrigger value="risk">At-risk learners ({atRisk.data?.length ?? "…"})</TabsTrigger>

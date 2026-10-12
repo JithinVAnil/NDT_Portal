@@ -5,6 +5,7 @@ import {
   BookOpen,
   Building2,
   CalendarCheck,
+  CalendarDays,
   ClipboardCheck,
   ClipboardList,
   Clapperboard,
@@ -16,6 +17,7 @@ import {
   LayoutDashboard,
   ListChecks,
   type LucideIcon,
+  MapPin,
   MonitorPlay,
   PlayCircle,
   RefreshCcw,
@@ -27,6 +29,7 @@ import {
   UserCog,
   Users,
   Presentation,
+  UserSquare,
 } from "lucide-react";
 import type { Role } from "@/types/api";
 
@@ -64,10 +67,18 @@ export const NAV: Record<Role, NavGroup[]> = {
     {
       label: "Training Delivery",
       items: [
+        { label: "Training Calendar", href: "/admin/calendar", icon: CalendarDays },
         { label: "Batches", href: "/admin/batches", icon: Layers },
         { label: "Attendance", href: "/admin/attendance", icon: CalendarCheck },
         { label: "Assessments", href: "/admin/assessments", icon: ClipboardCheck },
         { label: "Progress", href: "/admin/progress", icon: Activity },
+      ],
+    },
+    {
+      label: "Masters",
+      items: [
+        { label: "Training Venues", href: "/admin/venues", icon: MapPin },
+        { label: "Trainers", href: "/admin/trainers", icon: UserSquare },
       ],
     },
     {

@@ -7,7 +7,8 @@ They are not final NIELIT deliverables; actual videos are to be inserted when pr
 COURSES = [
     {
         "code": "CSA", "title": "Cyber Security Awareness", "short_title": "Cyber Security Awareness",
-        "level": "Foundation", "planned_hours": 24, "target_video_hours": 4.5,
+        "level": "Foundation", "version": "v2.1", "delivery_mode": "Classroom",
+        "planned_hours": 24, "target_video_hours": 4.5,
         "min_qualification": "Higher Secondary (12th)", "prerequisite": None,
         "target_audience": "All government employees and officers handling digital systems.",
         "description": "Foundational awareness course covering digital literacy, operating-system fundamentals, cyber hygiene, "
@@ -31,7 +32,8 @@ COURSES = [
     },
     {
         "code": "IOT", "title": "IoT Forensics", "short_title": "IoT Forensics",
-        "level": "Advanced", "planned_hours": 40, "target_video_hours": 7.0,
+        "level": "Advanced", "version": "v1.3", "delivery_mode": "Blended",
+        "planned_hours": 40, "target_video_hours": 7.0,
         "min_qualification": "Graduate", "prerequisite": "CSA",
         "target_audience": "Investigators, forensic analysts and technical officers handling embedded and IoT evidence.",
         "description": "Embedded systems architecture, forensic principles, physical and logical acquisition, UART, JTAG, chip-off, "
@@ -60,7 +62,8 @@ COURSES = [
     },
     {
         "code": "CLF", "title": "Cloud Forensics", "short_title": "Cloud Forensics",
-        "level": "Advanced", "planned_hours": 40, "target_video_hours": 7.0,
+        "level": "Advanced", "version": "v2.0", "delivery_mode": "Online",
+        "planned_hours": 40, "target_video_hours": 7.0,
         "min_qualification": "Graduate", "prerequisite": "CSA",
         "target_audience": "Investigators and IT officers responsible for cloud-hosted government workloads.",
         "description": "Cloud forensics on AWS and GCP: shared responsibility, evidence volatility, isolation, environment imaging, "
@@ -88,7 +91,8 @@ COURSES = [
     },
     {
         "code": "EDF", "title": "Enterprise DFIR", "short_title": "Enterprise DFIR",
-        "level": "Advanced", "planned_hours": 40, "target_video_hours": 7.0,
+        "level": "Advanced", "version": "v1.1", "delivery_mode": "Hybrid",
+        "planned_hours": 40, "target_video_hours": 7.0,
         "min_qualification": "Graduate", "prerequisite": "CSA",
         "target_audience": "Incident responders and security operations staff in large government enterprises.",
         "description": "Enterprise digital forensics and incident response: Microsoft 365, Microsoft Graph APIs, KQL hunting, "

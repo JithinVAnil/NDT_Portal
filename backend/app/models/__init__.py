@@ -13,5 +13,7 @@ from app.models.training import (  # noqa: F401
     Nomination,
     NominationHistory,
     PracticalSubmission,
+    Trainer,
     TrainingSession,
+    TrainingVenue,
 )

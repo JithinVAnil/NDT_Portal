@@ -396,7 +396,7 @@ export function NominationDetailPage({ role }: { role: Role }) {
           <>
             <Button variant="outline" onClick={() => setDialog(null)}>Cancel</Button>
             {dialog === "approve" ? (
-              <Button variant="success" loading={busy === "approve"} onClick={() => act("approve", "approve", { remarks: remarks || null }, "Nomination approved")}>
+              <Button variant="success" loading={busy === "approve"} disabled={n.eligibility_result === "REVIEW_REQUIRED" && !remarks.trim()} onClick={() => act("approve", "approve", { remarks: remarks || null }, "Nomination approved")}>
                 Approve
               </Button>
             ) : (
