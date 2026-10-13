@@ -45,9 +45,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: { email, password },
     });
     setToken(res.access_token);
-    const me = await api<SessionUser>("/auth/me");
-    setUser(me);
-    return me;
+    try {
+      const me = await api<SessionUser>("/auth/me");
+      setUser(me);
+      return me;
+    } catch {
+      setUser(res.user);
+      return res.user;
+    }
   }, []);
 
   const logout = useCallback(async () => {

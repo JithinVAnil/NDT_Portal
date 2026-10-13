@@ -126,19 +126,29 @@ export function ProgressPage({ role }: { role: Role }) {
       accessorKey: "learner",
       header: "Learner",
       cell: ({ row }) => (
-        <Link href={`${base}/learners/${row.original.learner_id}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>
-          <p className="font-medium text-brand-600">{row.original.learner}</p>
-          <p className="text-[11.5px] text-muted">{row.original.learner_code} · {row.original.department_code}</p>
-        </Link>
+        <div className="min-w-[160px]">
+          <Link href={`${base}/learners/${row.original.learner_id}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>
+            <p className="font-medium text-brand-600">{row.original.learner}</p>
+            <p className="text-[11.5px] text-muted whitespace-nowrap">{row.original.learner_code} · {row.original.department_code}</p>
+          </Link>
+        </div>
       ),
     },
-    { accessorKey: "course_code", header: "Course" },
-    { accessorKey: "batch", header: "Batch", cell: ({ row }) => <span className="text-[12px]">{row.original.batch}</span> },
+    {
+      accessorKey: "course_code",
+      header: "Course",
+      cell: ({ row }) => <span className="whitespace-nowrap font-medium">{row.original.course_code}</span>,
+    },
+    {
+      accessorKey: "batch",
+      header: "Batch",
+      cell: ({ row }) => <span className="text-[12px] whitespace-nowrap">{row.original.batch}</span>,
+    },
     {
       accessorKey: "overall_pct",
       header: "Progress",
       cell: ({ row }) => (
-        <div className="w-32">
+        <div className="w-28 min-w-[110px]">
           <div className="flex justify-between text-[12px]">
             <span className="tabular font-semibold">{pct(row.original.overall_pct)}</span>
             {row.original.expected_pct !== null && <span className="tabular text-muted">exp {pct(row.original.expected_pct)}</span>}
@@ -147,20 +157,20 @@ export function ProgressPage({ role }: { role: Role }) {
         </div>
       ),
     },
-    { id: "mod", header: "Modules", accessorFn: (p) => p.modules_completed, cell: ({ row }) => <span className="tabular">{row.original.modules_completed}/{row.original.modules_total}</span> },
-    { id: "prac", header: "Practicals", accessorFn: (p) => p.practicals_completed, cell: ({ row }) => <span className="tabular">{row.original.practicals_completed}/{row.original.practicals_total}</span> },
-    { id: "ass", header: "Assessments", accessorFn: (p) => p.assessments_passed, cell: ({ row }) => <span className="tabular">{row.original.assessments_passed}/{row.original.assessments_total}</span> },
-    { accessorKey: "attendance_pct", header: "Attendance", cell: ({ row }) => <span className="tabular">{pct(row.original.attendance_pct)}</span> },
-    { accessorKey: "average_score", header: "Avg score", cell: ({ row }) => <span className="tabular">{pct(row.original.average_score)}</span> },
-    { accessorKey: "last_activity_at", header: "Last activity", cell: ({ row }) => <span className="text-[12px]">{timeAgo(row.original.last_activity_at)}</span> },
+    { id: "mod", header: "Modules", accessorFn: (p) => p.modules_completed, cell: ({ row }) => <span className="tabular whitespace-nowrap">{row.original.modules_completed}/{row.original.modules_total}</span> },
+    { id: "prac", header: "Practicals", accessorFn: (p) => p.practicals_completed, cell: ({ row }) => <span className="tabular whitespace-nowrap">{row.original.practicals_completed}/{row.original.practicals_total}</span> },
+    { id: "ass", header: "Assessments", accessorFn: (p) => p.assessments_passed, cell: ({ row }) => <span className="tabular whitespace-nowrap">{row.original.assessments_passed}/{row.original.assessments_total}</span> },
+    { accessorKey: "attendance_pct", header: "Attendance", cell: ({ row }) => <span className="tabular whitespace-nowrap">{pct(row.original.attendance_pct)}</span> },
+    { accessorKey: "average_score", header: "Avg score", cell: ({ row }) => <span className="tabular whitespace-nowrap">{pct(row.original.average_score)}</span> },
+    { accessorKey: "last_activity_at", header: "Last activity", cell: ({ row }) => <span className="text-[12px] whitespace-nowrap">{timeAgo(row.original.last_activity_at)}</span> },
     {
       accessorKey: "risk_level",
       header: "Risk",
       cell: ({ row }) => (
-        <div className="max-w-[260px]">
+        <div className="min-w-[240px] max-w-[320px]">
           <RiskBadge level={row.original.risk_level} />
           {(row.original.risk_level === "AT_RISK" || row.original.risk_level === "CRITICAL") && (
-            <p className="mt-0.5 text-[11.5px] leading-snug text-muted">{row.original.risk_reasons.join("; ")}</p>
+            <p className="mt-1 text-[11.5px] leading-snug text-muted">{row.original.risk_reasons.join("; ")}</p>
           )}
         </div>
       ),
@@ -187,6 +197,7 @@ export function ProgressPage({ role }: { role: Role }) {
               <DataTable
                 columns={columns}
                 data={prog.data ?? []}
+                tableClassName="min-w-[1150px]"
                 searchPlaceholder="Search learner…"
                 emptyTitle="No progress records."
                 caption="Learner progress"
@@ -247,6 +258,7 @@ export function ProgressPage({ role }: { role: Role }) {
             {comp.loading && !comp.data ? <LoadingBlock /> : (
               <DataTable
                 data={comp.data ?? []}
+                tableClassName="min-w-[1050px]"
                 searchPlaceholder="Search learner…"
                 emptyTitle="No completion records."
                 toolbar={
@@ -256,12 +268,12 @@ export function ProgressPage({ role }: { role: Role }) {
                   </Select>
                 }
                 columns={[
-                  { accessorKey: "learner", header: "Learner", cell: ({ row }) => <div><p className="font-medium">{row.original.learner}</p><p className="text-[11.5px] text-muted">{row.original.learner_code} · {row.original.department_code}</p></div> },
-                  { accessorKey: "course_code", header: "Course" },
-                  { accessorKey: "batch", header: "Batch", cell: ({ row }) => <span className="text-[12px]">{row.original.batch}</span> },
-                  { accessorKey: "status", header: "Status", cell: ({ row }) => <StatusBadge status={row.original.status} /> },
-                  { id: "crit", header: "Criteria", cell: ({ row }) => <Criteria items={row.original.criteria} /> },
-                  { accessorKey: "certificate_no", header: "Reference", cell: ({ row }) => <span className="font-mono text-[11.5px]">{row.original.certificate_no ?? "—"}</span> },
+                  { accessorKey: "learner", header: "Learner", cell: ({ row }) => <div className="min-w-[160px]"><p className="font-medium text-brand-600">{row.original.learner}</p><p className="text-[11.5px] text-muted whitespace-nowrap">{row.original.learner_code} · {row.original.department_code}</p></div> },
+                  { accessorKey: "course_code", header: "Course", cell: ({ row }) => <span className="whitespace-nowrap font-medium">{row.original.course_code}</span> },
+                  { accessorKey: "batch", header: "Batch", cell: ({ row }) => <span className="text-[12px] whitespace-nowrap">{row.original.batch}</span> },
+                  { accessorKey: "status", header: "Status", cell: ({ row }) => <div className="whitespace-nowrap"><StatusBadge status={row.original.status} /></div> },
+                  { id: "crit", header: "Criteria", cell: ({ row }) => <div className="min-w-[260px]"><Criteria items={row.original.criteria} /></div> },
+                  { accessorKey: "certificate_no", header: "Reference", cell: ({ row }) => <span className="font-mono text-[11.5px] whitespace-nowrap">{row.original.certificate_no ?? "—"}</span> },
                   ...(role === "ADMIN"
                     ? [{
                         id: "act",

@@ -32,6 +32,8 @@ export function DataTable<T>({
   initialSort,
   dense,
   caption,
+  className,
+  tableClassName,
 }: {
   columns: ColumnDef<T, any>[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   data: T[];
@@ -45,6 +47,8 @@ export function DataTable<T>({
   initialSort?: SortingState;
   dense?: boolean;
   caption?: string;
+  className?: string;
+  tableClassName?: string;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>(initialSort ?? []);
   const [globalFilter, setGlobalFilter] = React.useState("");
@@ -91,8 +95,8 @@ export function DataTable<T>({
           <div className="flex flex-1 flex-wrap items-center justify-end gap-2">{toolbar}</div>
         </div>
       )}
-      <div className="scroll-thin overflow-x-auto">
-        <table className="w-full border-collapse text-left text-[13px]">
+      <div className={cn("scroll-thin overflow-x-auto", className)}>
+        <table className={cn("w-full border-collapse text-left text-[13px]", tableClassName)}>
           {caption && <caption className="sr-only">{caption}</caption>}
           <thead>
             {table.getHeaderGroups().map((hg) => (
@@ -143,7 +147,7 @@ export function DataTable<T>({
                 tabIndex={onRowClick ? 0 : undefined}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className={cn("px-3 align-middle first:pl-4 last:pr-4", dense ? "py-1.5" : "py-2.5")}>
+                  <td key={cell.id} className={cn("px-3 align-top first:pl-4 last:pr-4", dense ? "py-1.5" : "py-2.5")}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}

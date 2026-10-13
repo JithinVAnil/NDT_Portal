@@ -78,14 +78,14 @@ export function LoginScreen() {
     try {
       const me = await login(v.email, v.password);
       const next = params.get("next");
-      router.replace(
+      const target =
         next &&
-          next.startsWith(
-            `/${me.role === "ADMIN" ? "admin" : me.role === "DEPARTMENT" ? "department" : "learner"}`
-          )
+        next.startsWith(
+          `/${me.role === "ADMIN" ? "admin" : me.role === "DEPARTMENT" ? "department" : "learner"}`
+        )
           ? next
-          : ROLE_HOME[me.role]
-      );
+          : ROLE_HOME[me.role];
+      window.location.href = target;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Sign-in failed");
     }
@@ -368,12 +368,13 @@ export function LoginScreen() {
                     </div>
                     <button
                       type="button"
+                      disabled={isSubmitting}
                       onClick={() => {
                         setValue("email", a.email, { shouldValidate: true });
                         setValue("password", "Demo@12345", { shouldValidate: true });
-                        setFocus("password");
+                        onSubmit({ email: a.email, password: "Demo@12345" });
                       }}
-                      className="ml-2 shrink-0 rounded-md bg-blue-50 hover:bg-blue-100 px-3 py-1.5 text-[12px] font-medium text-blue-600 transition-colors"
+                      className="ml-2 shrink-0 rounded-md bg-blue-50 hover:bg-blue-100 px-3 py-1.5 text-[12px] font-medium text-blue-600 transition-colors disabled:opacity-50"
                     >
                       Use
                     </button>

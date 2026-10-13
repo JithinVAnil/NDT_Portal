@@ -69,7 +69,7 @@ export async function api<T = unknown>(
 ): Promise<T> {
   const headers: Record<string, string> = {};
   const token = getToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
+  if (token && !path.startsWith("/auth/login")) headers.Authorization = `Bearer ${token}`;
   let body: BodyInit | undefined;
   if (opts.form) body = opts.form;
   else if (opts.body !== undefined) {
@@ -93,7 +93,13 @@ export async function api<T = unknown>(
   }
   if (!res.ok) throw new ApiError(res.status, await parseError(res));
   if (res.status === 204) return undefined as T;
-  return (await res.json()) as T;
+  const text = await res.text();
+  if (!text || !text.trim()) return undefined as T;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return text as unknown as T;
+  }
 }
 
 /** Download a file (CSV/XLSX/PDF) produced by the backend. */
