@@ -152,67 +152,92 @@ export function LoginScreen() {
               Forensics, supporting nominated learners from authorized departments.
             </p>
 
+            {/* Feature Card Shimmer Keyframe */}
+            <style>{`
+              @keyframes shimmer-sweep {
+                0%   { transform: translateX(-120%) skewX(-15deg); opacity: 0; }
+                40%  { opacity: 1; }
+                100% { transform: translateX(220%) skewX(-15deg); opacity: 0; }
+              }
+              .feature-card:hover .card-shimmer {
+                animation: shimmer-sweep 0.65s ease-in-out forwards;
+              }
+            `}</style>
             {/* 4 Feature Cards (2x2 Grid) */}
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-[490px]">
+
               {/* Cyber Security Awareness */}
-              <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-[#071d3a]/80 p-3.5 backdrop-blur-sm shadow-sm">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-emerald-500/40 bg-emerald-950/60 text-emerald-400">
+              <div className="feature-card group relative overflow-hidden flex items-start gap-3 rounded-xl border border-white/10 bg-[#071d3a]/80 p-3.5 backdrop-blur-sm shadow-sm cursor-default
+                transition-all duration-300 ease-out
+                hover:scale-[1.04] hover:border-emerald-500/50 hover:shadow-[0_0_18px_2px_rgba(16,185,129,0.18)] hover:bg-[#081f3d]/90">
+                <span className="card-shimmer pointer-events-none absolute inset-0 w-[45%] bg-gradient-to-r from-transparent via-emerald-300/20 to-transparent" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-emerald-500/40 bg-emerald-950/60 text-emerald-400 transition-all duration-300 group-hover:border-emerald-400/70 group-hover:bg-emerald-900/60 group-hover:text-emerald-300 group-hover:scale-110">
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-[12.5px] font-semibold text-white leading-tight">
+                  <h3 className="text-[12.5px] font-semibold text-white leading-tight transition-colors duration-300 group-hover:text-emerald-200">
                     Cyber Security Awareness
                   </h3>
-                  <p className="text-[11px] text-slate-400 mt-1 leading-snug">
+                  <p className="text-[11px] text-slate-400 mt-1 leading-snug transition-colors duration-300 group-hover:text-slate-300">
                     Build a safer digital workforce
                   </p>
                 </div>
               </div>
 
               {/* IoT Forensics */}
-              <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-[#071d3a]/80 p-3.5 backdrop-blur-sm shadow-sm">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cyan-500/40 bg-cyan-950/60 text-cyan-400">
+              <div className="feature-card group relative overflow-hidden flex items-start gap-3 rounded-xl border border-white/10 bg-[#071d3a]/80 p-3.5 backdrop-blur-sm shadow-sm cursor-default
+                transition-all duration-300 ease-out
+                hover:scale-[1.04] hover:border-cyan-500/50 hover:shadow-[0_0_18px_2px_rgba(6,182,212,0.18)] hover:bg-[#081f3d]/90">
+                <span className="card-shimmer pointer-events-none absolute inset-0 w-[45%] bg-gradient-to-r from-transparent via-cyan-300/20 to-transparent" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cyan-500/40 bg-cyan-950/60 text-cyan-400 transition-all duration-300 group-hover:border-cyan-400/70 group-hover:bg-cyan-900/60 group-hover:text-cyan-300 group-hover:scale-110">
                   <Share2 className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-[12.5px] font-semibold text-white leading-tight">
+                  <h3 className="text-[12.5px] font-semibold text-white leading-tight transition-colors duration-300 group-hover:text-cyan-200">
                     IoT Forensics
                   </h3>
-                  <p className="text-[11px] text-slate-400 mt-1 leading-snug">
+                  <p className="text-[11px] text-slate-400 mt-1 leading-snug transition-colors duration-300 group-hover:text-slate-300">
                     Investigate connected devices and systems
                   </p>
                 </div>
               </div>
 
               {/* Cloud Forensics */}
-              <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-[#071d3a]/80 p-3.5 backdrop-blur-sm shadow-sm">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-indigo-500/40 bg-indigo-950/60 text-indigo-400">
+              <div className="feature-card group relative overflow-hidden flex items-start gap-3 rounded-xl border border-white/10 bg-[#071d3a]/80 p-3.5 backdrop-blur-sm shadow-sm cursor-default
+                transition-all duration-300 ease-out
+                hover:scale-[1.04] hover:border-indigo-500/50 hover:shadow-[0_0_18px_2px_rgba(99,102,241,0.18)] hover:bg-[#081f3d]/90">
+                <span className="card-shimmer pointer-events-none absolute inset-0 w-[45%] bg-gradient-to-r from-transparent via-indigo-300/20 to-transparent" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-indigo-500/40 bg-indigo-950/60 text-indigo-400 transition-all duration-300 group-hover:border-indigo-400/70 group-hover:bg-indigo-900/60 group-hover:text-indigo-300 group-hover:scale-110">
                   <Cloud className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-[12.5px] font-semibold text-white leading-tight">
+                  <h3 className="text-[12.5px] font-semibold text-white leading-tight transition-colors duration-300 group-hover:text-indigo-200">
                     Cloud Forensics
                   </h3>
-                  <p className="text-[11px] text-slate-400 mt-1 leading-snug">
+                  <p className="text-[11px] text-slate-400 mt-1 leading-snug transition-colors duration-300 group-hover:text-slate-300">
                     Analyze cloud environments and evidence
                   </p>
                 </div>
               </div>
 
               {/* Enterprise DFIR */}
-              <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-[#071d3a]/80 p-3.5 backdrop-blur-sm shadow-sm">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-amber-500/40 bg-amber-950/60 text-amber-400">
+              <div className="feature-card group relative overflow-hidden flex items-start gap-3 rounded-xl border border-white/10 bg-[#071d3a]/80 p-3.5 backdrop-blur-sm shadow-sm cursor-default
+                transition-all duration-300 ease-out
+                hover:scale-[1.04] hover:border-amber-500/50 hover:shadow-[0_0_18px_2px_rgba(245,158,11,0.18)] hover:bg-[#081f3d]/90">
+                <span className="card-shimmer pointer-events-none absolute inset-0 w-[45%] bg-gradient-to-r from-transparent via-amber-300/20 to-transparent" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-amber-500/40 bg-amber-950/60 text-amber-400 transition-all duration-300 group-hover:border-amber-400/70 group-hover:bg-amber-900/60 group-hover:text-amber-300 group-hover:scale-110">
                   <MonitorDot className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-[12.5px] font-semibold text-white leading-tight">
+                  <h3 className="text-[12.5px] font-semibold text-white leading-tight transition-colors duration-300 group-hover:text-amber-200">
                     Enterprise DFIR
                   </h3>
-                  <p className="text-[11px] text-slate-400 mt-1 leading-snug">
+                  <p className="text-[11px] text-slate-400 mt-1 leading-snug transition-colors duration-300 group-hover:text-slate-300">
                     Respond, investigate and recover
                   </p>
                 </div>
               </div>
+
             </div>
           </div>
 

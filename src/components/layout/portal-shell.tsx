@@ -56,15 +56,19 @@ function Sidebar({ role, open, onClose }: { role: Role; open: boolean; onClose: 
         )}
         aria-label="Primary navigation"
       >
-        <div className="flex items-start justify-between border-b border-white/10 px-4 pb-3 pt-4">
-          <BrandBlock />
-          <button className="rounded p-1 text-white/70 hover:bg-white/10 lg:hidden" onClick={onClose} aria-label="Close menu">
+        <div className="relative flex items-start justify-between border-b border-white/10 px-4 pb-4 pt-4">
+          <div className="flex items-center gap-3">
+            <img src="/iconnect-icon-white.png" alt="I-Connect" className="h-9 w-9 shrink-0 object-contain" />
+            <div className="min-w-0">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-amber-400">Powered by</p>
+              <p className="text-[12px] font-bold leading-tight text-white">I-CONNECTRESOURCES</p>
+              <p className="text-[9.5px] font-medium leading-tight text-white/60">INTERNATIONAL PRIVATE LIMITED</p>
+              <p className="mt-1 text-[9px] leading-snug text-white/40">Strengthening Digital Security<br />through Specialized Training</p>
+            </div>
+          </div>
+          <button className="mt-0.5 rounded p-1 text-white/70 hover:bg-white/10 lg:hidden" onClick={onClose} aria-label="Close menu">
             <X className="h-4 w-4" />
           </button>
-        </div>
-        <div className="border-b border-white/10 px-4 py-2.5">
-          <p className="text-[10.5px] uppercase tracking-wider text-white/45">Ministry of Electronics &amp; IT · Government of India</p>
-          <p className="mt-0.5 text-[11.5px] leading-snug text-white/80">Digital Training &amp; Forensics Capacity Building Programme</p>
         </div>
         <nav className="scroll-thin flex-1 overflow-y-auto px-2 py-3">
           {NAV[role].map((group, gi) => (
@@ -99,8 +103,10 @@ function Sidebar({ role, open, onClose }: { role: Role; open: boolean; onClose: 
             </div>
           ))}
         </nav>
-        <div className="border-t border-white/10 px-4 py-3 text-[10.5px] leading-snug text-white/45">
-          Prototype v0.9 · Learning delivered via NIELIT Digital University (NDU) — demo integration
+        <div className="border-t border-white/10 px-4 py-3">
+          <p className="text-[9px] uppercase tracking-widest text-white/30">Powered by</p>
+          <p className="mt-0.5 text-[10px] font-semibold text-white/55">I-Connectresources International Pvt. Ltd.</p>
+          <p className="mt-0.5 text-[10px] leading-snug text-white/35">Learning delivered via NDU · v0.9</p>
         </div>
       </aside>
     </>
