@@ -20,7 +20,8 @@ HOME = {RoleCode.ADMIN: "/admin/dashboard", RoleCode.DEPARTMENT: "/department/da
 
 @router.post("/login")
 def login(body: LoginRequest, request: Request, db: Session = Depends(get_db)):
-    user = db.scalar(select(User).where(func.lower(User.email) == body.email))
+    email_clean = (body.email or "").strip().lower()
+    user = db.scalar(select(User).where(func.lower(User.email) == email_clean))
     if not user or not user.is_active or not verify_password(body.password, user.password_hash):
         audit.record(db, user if user else None, "LOGIN", "User", user.id if user else None, result="FAILURE",
                      details="Invalid credentials", request=request, email_override=body.email)
