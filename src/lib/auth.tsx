@@ -45,6 +45,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: { email, password },
     });
     setToken(res.access_token);
+    // If the login response already contains the user, use it directly.
+    // Only fall back to a separate /auth/me call if user is missing from response.
+    if (res.user) {
+      setUser(res.user);
+      return res.user;
+    }
     try {
       const me = await api<SessionUser>("/auth/me");
       setUser(me);

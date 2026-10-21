@@ -205,44 +205,156 @@ def charts(db: Session, dept_id: int | None = None) -> dict:
 
 
 def department_performance(db: Session) -> list[dict]:
+    """Bulk-load all department KPIs in 4 queries instead of N×10 queries."""
+    depts = db.scalars(select(Department).where(Department.is_active.is_(True)).order_by(Department.code)).all()
+    if not depts:
+        return []
+    dept_ids = [d.id for d in depts]
+
+    # Learner counts per department
+    learner_rows = db.execute(
+        select(Learner.department_id, func.count(Learner.id)).group_by(Learner.department_id)
+    ).all()
+    learner_map = {did: cnt for did, cnt in learner_rows}
+
+    # Progress + risk per department (via learner -> enrollment -> progress)
+    prog_rows = db.execute(
+        select(Learner.department_id, LearnerProgress.overall_pct, LearnerProgress.risk_level, LearnerProgress.learner_id)
+        .join(CourseEnrollment, CourseEnrollment.id == LearnerProgress.enrollment_id)
+        .join(Learner, Learner.id == LearnerProgress.learner_id)
+        .where(CourseEnrollment.status.in_(STARTED), Learner.department_id.in_(dept_ids))
+    ).all()
+    prog_by_dept: dict[int, list] = defaultdict(list)
+    for did, pct, risk, lid in prog_rows:
+        prog_by_dept[did].append((pct, risk, lid))
+
+    # Attendance per department
+    att_rows = db.execute(
+        select(Learner.department_id, Attendance.status, func.count(Attendance.id))
+        .join(Learner, Learner.id == Attendance.learner_id)
+        .where(Learner.department_id.in_(dept_ids))
+        .group_by(Learner.department_id, Attendance.status)
+    ).all()
+    att_by_dept: dict[int, dict[str, int]] = defaultdict(dict)
+    for did, st, cnt in att_rows:
+        att_by_dept[did][st] = cnt
+
+    # Assessment scores per department
+    score_rows = db.execute(
+        select(Learner.department_id, func.avg(AssessmentResult.percentage))
+        .join(Learner, Learner.id == AssessmentResult.learner_id)
+        .where(Learner.department_id.in_(dept_ids))
+        .group_by(Learner.department_id)
+    ).all()
+    score_map = {did: (round(float(avg), 1) if avg is not None else 0) for did, avg in score_rows}
+
+    # Completions per department
+    comp_rows = db.execute(
+        select(Learner.department_id, func.count(CompletionRecord.id))
+        .join(Learner, Learner.id == CompletionRecord.learner_id)
+        .where(CompletionRecord.status == CompletionStatus.COMPLETED, Learner.department_id.in_(dept_ids))
+        .group_by(Learner.department_id)
+    ).all()
+    comp_map = {did: cnt for did, cnt in comp_rows}
+
     rows = []
-    for d in db.scalars(select(Department).where(Department.is_active.is_(True)).order_by(Department.code)).all():
-        k = kpis(db, d.id)
+    for d in depts:
+        progs = prog_by_dept.get(d.id, [])
+        att = att_by_dept.get(d.id, {})
+        attended = att.get("Present", 0) + att.get("Late", 0)
+        marked = attended + att.get("Absent", 0)
+        att_rate = round(100 * attended / marked, 1) if marked else 0
+        avg_prog = _avg([p[0] for p in progs]) or 0
+        at_risk = len({p[2] for p in progs if p[1] in (RiskLevel.AT_RISK, RiskLevel.CRITICAL)})
         rows.append({
-            "department_id": d.id, "department": d.code, "name": d.name, "learners": k["learners"],
-            "average_progress": k["average_progress"] or 0, "attendance_rate": k["attendance_rate"] or 0,
-            "average_score": k["average_score"] or 0, "completed": k["completed"], "at_risk": k["at_risk_learners"],
+            "department_id": d.id, "department": d.code, "name": d.name,
+            "learners": learner_map.get(d.id, 0),
+            "average_progress": avg_prog, "attendance_rate": att_rate,
+            "average_score": score_map.get(d.id, 0),
+            "completed": comp_map.get(d.id, 0), "at_risk": at_risk,
         })
     return rows
 
 
 def course_cards(db: Session, dept_id: int | None = None) -> list[dict]:
+    """Bulk-load all course card data in ~4 queries instead of 7 per course."""
     lf = _learner_filter(dept_id)
+    courses = db.scalars(select(Course).order_by(Course.id)).all()
+    if not courses:
+        return []
+    course_ids = [c.id for c in courses]
+
+    def scoped(stmt, col):
+        return stmt.where(col.in_(lf)) if lf is not None else stmt
+
+    # Enrollment counts (all statuses + started statuses)
+    enr_all = db.execute(scoped(
+        select(CourseEnrollment.course_id, func.count(CourseEnrollment.id))
+        .where(CourseEnrollment.course_id.in_(course_ids))
+        .group_by(CourseEnrollment.course_id), CourseEnrollment.learner_id
+    )).all()
+    enr_all_map = {cid: cnt for cid, cnt in enr_all}
+
+    enr_started = db.execute(scoped(
+        select(CourseEnrollment.course_id, func.count(CourseEnrollment.id))
+        .where(CourseEnrollment.course_id.in_(course_ids), CourseEnrollment.status.in_(STARTED))
+        .group_by(CourseEnrollment.course_id), CourseEnrollment.learner_id
+    )).all()
+    enr_started_map = {cid: cnt for cid, cnt in enr_started}
+
+    # Completion counts
+    comp_rows = db.execute(scoped(
+        select(CompletionRecord.course_id, func.count(CompletionRecord.id))
+        .where(CompletionRecord.course_id.in_(course_ids), CompletionRecord.status == CompletionStatus.COMPLETED)
+        .group_by(CompletionRecord.course_id), CompletionRecord.learner_id
+    )).all()
+    comp_map = {cid: cnt for cid, cnt in comp_rows}
+
+    # Average assessment score
+    score_rows = db.execute(scoped(
+        select(AssessmentResult.course_id, func.avg(AssessmentResult.percentage))
+        .where(AssessmentResult.course_id.in_(course_ids))
+        .group_by(AssessmentResult.course_id), AssessmentResult.learner_id
+    )).all()
+    score_map = {cid: (round(float(avg), 1) if avg is not None else None) for cid, avg in score_rows}
+
+    # Content: video count + duration, non-video count
+    video_rows = db.execute(
+        select(ContentItem.course_id, func.count(ContentItem.id),
+               func.coalesce(func.sum(ContentItem.duration_minutes), 0))
+        .where(ContentItem.course_id.in_(course_ids), ContentItem.content_type == "Video")
+        .group_by(ContentItem.course_id)
+    ).all()
+    video_map = {cid: (vc, vd) for cid, vc, vd in video_rows}
+
+    resource_rows = db.execute(
+        select(ContentItem.course_id, func.count(ContentItem.id))
+        .where(ContentItem.course_id.in_(course_ids), ContentItem.content_type != "Video")
+        .group_by(ContentItem.course_id)
+    ).all()
+    resource_map = {cid: cnt for cid, cnt in resource_rows}
+
+    # Practical counts
+    prac_rows = db.execute(
+        select(Practical.course_id, func.count(Practical.id))
+        .where(Practical.course_id.in_(course_ids))
+        .group_by(Practical.course_id)
+    ).all()
+    prac_map = {cid: cnt for cid, cnt in prac_rows}
+
     cards = []
-    for c in db.scalars(select(Course).order_by(Course.id)).all():
-        def q(stmt, col):
-            return stmt.where(col.in_(lf)) if lf is not None else stmt
-        learners = db.scalar(q(select(func.count(CourseEnrollment.id)).where(CourseEnrollment.course_id == c.id),
-                               CourseEnrollment.learner_id)) or 0
-        started = db.scalar(q(select(func.count(CourseEnrollment.id)).where(
-            CourseEnrollment.course_id == c.id, CourseEnrollment.status.in_(STARTED)), CourseEnrollment.learner_id)) or 0
-        completed = db.scalar(q(select(func.count(CompletionRecord.id)).where(
-            CompletionRecord.course_id == c.id, CompletionRecord.status == CompletionStatus.COMPLETED),
-            CompletionRecord.learner_id)) or 0
-        avg = db.scalar(q(select(func.avg(AssessmentResult.percentage)).where(AssessmentResult.course_id == c.id),
-                          AssessmentResult.learner_id))
-        videos = db.execute(select(func.count(ContentItem.id), func.coalesce(func.sum(ContentItem.duration_minutes), 0))
-                            .where(ContentItem.course_id == c.id, ContentItem.content_type == "Video")).one()
-        resources = db.scalar(select(func.count(ContentItem.id)).where(
-            ContentItem.course_id == c.id, ContentItem.content_type != "Video")) or 0
-        practicals = db.scalar(select(func.count(Practical.id)).where(Practical.course_id == c.id)) or 0
+    for c in courses:
+        started = enr_started_map.get(c.id, 0)
+        completed = comp_map.get(c.id, 0)
+        vc, vd = video_map.get(c.id, (0, 0))
         cards.append({
             "id": c.id, "code": c.code, "title": c.title, "short_title": c.short_title, "level": c.level,
             "version": c.version, "delivery_mode": c.delivery_mode,
-            "learners": learners, "active": started,
-            "completion_pct": round(100 * completed / started, 1) if started else 0, "completed": completed,
-            "average_score": round(float(avg), 1) if avg is not None else None,
-            "content_count": videos[0] + resources, "video_count": videos[0],
-            "video_minutes": round(float(videos[1]), 1), "practical_count": practicals,
+            "learners": enr_all_map.get(c.id, 0), "active": started,
+            "completion_pct": round(100 * completed / started, 1) if started else 0,
+            "completed": completed,
+            "average_score": score_map.get(c.id),
+            "content_count": vc + resource_map.get(c.id, 0), "video_count": vc,
+            "video_minutes": round(float(vd), 1), "practical_count": prac_map.get(c.id, 0),
         })
     return cards

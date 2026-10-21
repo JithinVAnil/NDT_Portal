@@ -77,12 +77,15 @@ export async function api<T = unknown>(
     body = JSON.stringify(opts.body);
   }
   let res: Response;
+  const method = opts.method ?? (body ? "POST" : "GET");
   try {
     res = await fetch(`${opts.base ?? ""}/api${path}${qs(opts.query)}`, {
-      method: opts.method ?? (body ? "POST" : "GET"),
+      method,
       headers,
       body,
-      cache: "no-store",
+      // GET requests use browser cache (stale-while-revalidate behaviour) so
+      // re-navigating to a section feels instant. Mutations always bypass cache.
+      cache: method === "GET" ? "default" : "no-store",
     });
   } catch {
     throw new ApiError(0, "Cannot reach the portal API. Check that the backend is running on port 8000.");
