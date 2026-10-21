@@ -397,7 +397,8 @@ export function LoginScreen() {
                       onClick={() => {
                         setValue("email", a.email, { shouldValidate: true });
                         setValue("password", "Demo@12345", { shouldValidate: true });
-                        onSubmit({ email: a.email, password: "Demo@12345" });
+                        // Just fill the fields — user must click Login themselves
+                        setFocus("email");
                       }}
                       className="ml-2 shrink-0 rounded-md bg-blue-50 hover:bg-blue-100 px-3 py-1.5 text-[12px] font-medium text-blue-600 transition-colors disabled:opacity-50"
                     >
