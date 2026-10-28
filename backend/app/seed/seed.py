@@ -160,7 +160,7 @@ class Seeder:
     def roles(self):
         self.role = {}
         for code, name, desc in [
-            (RoleCode.ADMIN, "NIELIT Administrator", "Programme-wide administration, approvals and reporting"),
+            (RoleCode.ADMIN, "Administrator", "Programme-wide administration, approvals and reporting"),
             (RoleCode.DEPARTMENT, "Department In-Charge", "Nominates and monitors learners of one department"),
             (RoleCode.LEARNER, "Learner", "Accesses own training, progress and results"),
         ]:

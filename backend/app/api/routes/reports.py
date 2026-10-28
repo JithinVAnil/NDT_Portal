@@ -33,7 +33,7 @@ def _report(key: str, user: User):
     if not rep:
         raise not_found("Report")
     if user.role_code not in rep.roles:
-        raise forbid("This report is available to NIELIT Administrators only")
+        raise forbid("This report is available to Administrators only")
     return rep
 
 

@@ -227,7 +227,7 @@ export function UsersPage() {
             toolbar={
               <Select value={role} onChange={(e) => setRole(e.target.value)} className="w-52" aria-label="Filter by role">
                 <option value="">All roles</option>
-                <option value="ADMIN">NIELIT Administrator</option>
+                <option value="ADMIN">Administrator</option>
                 <option value="DEPARTMENT">Department In-Charge</option>
                 <option value="LEARNER">Learner</option>
               </Select>
@@ -249,7 +249,7 @@ export function UsersPage() {
           <Field label="Role" htmlFor="u-r" required>
             <Select id="u-r" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
               <option value="DEPARTMENT">Department In-Charge</option>
-              <option value="ADMIN">NIELIT Administrator</option>
+              <option value="ADMIN">Administrator</option>
             </Select>
           </Field>
           {form.role === "DEPARTMENT" && (

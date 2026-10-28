@@ -31,7 +31,7 @@ type FormValues = z.infer<typeof schema>;
 
 const DEMO_ACCOUNTS = [
   {
-    role: "NIELIT Administrator",
+    role: "Administrator",
     email: "admin@nielit-demo.local",
     icon: Shield,
     color: "bg-blue-50 border-blue-100 text-blue-600",

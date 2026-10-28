@@ -56,8 +56,8 @@ not shown in the portal UI.
 
 | Role | Email | Notes |
 |---|---|---|
-| NIELIT Administrator | `admin@nielit-demo.local` | Full programme administration |
-| NIELIT Administrator | `coordinator@nielit-demo.local` | Training coordinator |
+| Administrator | `admin@nielit-demo.local` | Full programme administration |
+| Administrator | `coordinator@nielit-demo.local` | Training coordinator |
 | Department In-Charge | `department@nielit-demo.local` | State Cyber Investigation Bureau (SCIB) |
 | Department In-Charge | `department2@nielit-demo.local` | Directorate of Digital Governance (DDG) |
 | Department In-Charge | `department3@nielit-demo.local` | Department of Health Informatics (DHI) |
